@@ -71,12 +71,11 @@ class CrownCloud(SolusvmHoster):
         self.br.submit()
 
     def start(self):
-        clown_page = self.br.open('http://crowncloud.net/openvz.php')
-        return self.parse_options(clown_page)
+        self.br.open('http://crowncloud.net/openvz.php')
+        return self.parse_options(self.br.get_current_page())
 
     def parse_options(self, page):
-        soup = BeautifulSoup(page, 'lxml')
-        tables = soup.findAll('table')
+        tables = page.findAll('table')
         for details in tables:
             for column in details.findAll('tr'):
                 if len(column.findAll('td')) > 0:
@@ -87,14 +86,15 @@ class CrownCloud(SolusvmHoster):
         if bandwidth == '512 GB':
             return 0.5
         else:
-            return float(bandwidth.split('T')[0])
+            return float(bandwidth.split(' ')[0])
 
     @staticmethod
     def parse_clown_options(column):
         elements = column.findAll('td')
-        ram = elements[1].text.split('/')[0]
+        ram = elements[1].text.split('<br>')[0]
         ram = float(ram.split('M')[0]) / 1024
-        price = elements[8].text
+        price = elements[6].text
+        price = price.split("<br>")[0]
         price = price.split('$')[1]
         price = float(price.split('/')[0])
 
@@ -104,10 +104,10 @@ class CrownCloud(SolusvmHoster):
             storage=float(elements[2].text.split('G')[0]),
             cpu=int(elements[3].text.split('v')[0]),
             bandwidth=CrownCloud.beautiful_bandwidth(elements[4].text),
-            connection=int(elements[7].text.split('G')[0]) * 1000,
+            connection=int(elements[4].text.split('GB')[1].split('G')[0]) * 1000,
             price=price,
-            currency=determine_currency(elements[8].text),
-            purchase_url=elements[9].find('a')['href']
+            currency=determine_currency(elements[6].text),
+            purchase_url=elements[7].find('a')['href']
         )
 
     def get_status(self, user_settings):
