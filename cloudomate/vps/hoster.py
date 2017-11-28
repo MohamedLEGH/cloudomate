@@ -6,9 +6,9 @@ import os
 import random
 import webbrowser
 from tempfile import mkstemp
-from urlparse import urlparse
+from urllib.parse import urlparse
 
-from mechanize import Browser
+from mechanicalsoup import StatefulBrowser
 
 from cloudomate import wallet as wallet_util
 
@@ -75,11 +75,11 @@ class Hoster(object):
         :param vps_option: server configuration
         :return: 
         """
-        print('Purchasing %s instance: %s' % (type(self).__name__, vps_option.name))
+        print(('Purchasing %s instance: %s' % (type(self).__name__, vps_option.name)))
         amount, address = self.register(user_settings, vps_option)
-        print('Paying %s BTC to %s' % (amount, address))
+        print(('Paying %s BTC to %s' % (amount, address)))
         fee = wallet_util.get_network_fee()
-        print('Calculated fee: %s' % fee)
+        print(('Calculated fee: %s' % fee))
         transaction_hash = wallet.pay(address, amount, fee)
         print('Done purchasing')
         return transaction_hash
@@ -124,13 +124,13 @@ class Hoster(object):
         Print parsed VPS configurations.
         """
         row_format = "{:<5}" + "{:18}" * 8
-        print(row_format.format("#", "Name", "CPU (cores)", "RAM (GB)", "Storage (GB)", "Bandwidth (TB)",
-                                "Connection (Mbps)",
-                                "Est. Price (mBTC)", "Price"))
+        print((row_format.format("#", "Name", "CPU (cores)", "RAM (GB)", "Storage (GB)", "Bandwidth (TB)",
+                                 "Connection (Mbps)",
+                                 "Est. Price (mBTC)", "Price")))
 
         for i, item, estimated_price, price_string in self.get_configurations():
-            print(row_format.format(i, item.name, str(item.cpu), str(item.ram), str(item.storage), str(item.bandwidth),
-                                    str(item.connection), price_string, '{0} {1}'.format(item.currency, item.price)))
+            print((row_format.format(i, item.name, str(item.cpu), str(item.ram), str(item.storage), str(item.bandwidth),
+                                     str(item.connection), price_string, '{0} {1}'.format(item.currency, item.price))))
 
     def get_configurations(self):
         currencies = set(item.currency for item in self.configurations)
@@ -147,10 +147,7 @@ class Hoster(object):
 
     @staticmethod
     def _create_browser():
-        br = Browser()
-        br.set_handle_robots(False)
-        br.addheaders = [('User-agent', random.choice(user_agents))]
-        return br
+        return StatefulBrowser(user_agent=random.choice(user_agents))
 
     @staticmethod
     def _open_in_browser(page):

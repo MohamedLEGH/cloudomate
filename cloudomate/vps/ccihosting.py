@@ -1,4 +1,3 @@
-import sys
 from collections import OrderedDict
 
 from bs4 import BeautifulSoup

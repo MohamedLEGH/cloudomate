@@ -3,13 +3,13 @@ import sys
 from collections import OrderedDict
 
 from bs4 import BeautifulSoup
+from mechanicalsoup import LinkNotFoundError
 
 import cloudomate.gateway.bitpay
 from cloudomate.vps.clientarea import ClientArea
 from cloudomate.vps.solusvm_hoster import SolusvmHoster
 from cloudomate.vps.vpsoption import VpsOption
 from cloudomate.wallet import determine_currency
-from mechanize._mechanize import FormNotFoundError
 
 
 class CrownCloud(SolusvmHoster):
@@ -63,7 +63,7 @@ class CrownCloud(SolusvmHoster):
             self.br.form['configoption[1]'] = ['56']
             self.br.form['configoption[8]'] = ['52']
             self.br.form['configoption[9]'] = '0'
-        except FormNotFoundError:
+        except LinkNotFoundError:
             self.select_form_id(self.br, 'frmConfigureProduct')
             self.fill_in_server_form(self.br.form, user_settings, nameservers=False, rootpw=False, hostname=False)
             print("Using classic form")
@@ -118,12 +118,12 @@ class CrownCloud(SolusvmHoster):
         print("CrownCloud does not support changing root password through their configuration panel.")
         clientarea = ClientArea(self.br, self.clientarea_url, user_settings)
         (ip, user, rootpw) = self._extract_vps_information(clientarea)
-        print("IP: %s" % ip)
-        print("Root password: %s\n" % rootpw)
+        print(("IP: %s" % ip))
+        print(("Root password: %s\n" % rootpw))
 
         print("https://crownpanel.com")
-        print("Username: %s" % user)
-        print("Password: %s\n" % rootpw)
+        print(("Username: %s" % user))
+        print(("Password: %s\n" % rootpw))
 
     def _extract_vps_information(self, clientarea):
         emails = clientarea.get_emails()

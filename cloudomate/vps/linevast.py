@@ -1,11 +1,11 @@
-import itertools
 import json
 import sys
-import urllib
+import urllib.error
+import urllib.parse
+import urllib.request
 from collections import OrderedDict
 
 from bs4 import BeautifulSoup
-from mechanize import ControlNotFoundError
 
 from cloudomate.gateway import bitpay
 from cloudomate.vps.clientarea import ClientArea
@@ -99,7 +99,7 @@ class LineVast(SolusvmHoster):
             bandwidth='unmetered',
             currency='EUR',
             connection=int(elements[4].text.split(' GB')[0]) * 1000,
-            price=float(plan.find('div', {'class': 'plans-price'}).span.text.replace(u'\u20AC', '')),
+            price=float(plan.find('div', {'class': 'plans-price'}).span.text.replace('\u20AC', '')),
             purchase_url=plan.a['href'],
         )
         return option
@@ -127,7 +127,7 @@ class LineVast(SolusvmHoster):
             currency='EUR',
             bandwidth='unmetered',
             connection=int(elements[4].text.split(' GB')[0]) * 1000,
-            price=float(plan.find('div', {'class': 'plans-price'}).span.text.replace(u'\u20AC', '')),
+            price=float(plan.find('div', {'class': 'plans-price'}).span.text.replace('\u20AC', '')),
             purchase_url=plan.a['href'],
         )
         return option
@@ -157,7 +157,7 @@ class LineVast(SolusvmHoster):
             'opt': user_settings.get('rootpw'),
             'vi': vi
         }
-        data = urllib.urlencode(data)
+        data = urllib.parse.urlencode(data)
         page = self.br.open("https://vm.linevast.de/_vm_remote.php", data)
         if not self._check_set_rootpw(page.get_data()):
             print("Setting password failed")

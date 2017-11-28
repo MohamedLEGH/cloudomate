@@ -78,7 +78,7 @@ class BlueAngelHost(SolusvmHoster):
         match = re.search('String\.fromCharCode\((\d+)\)\+String\.fromCharCode\((\d+)\)', html)
         if not match:
             return None
-        return ''.join(map(unichr, [int(match.group(1)), int(match.group(2))]))
+        return ''.join(map(chr, [int(match.group(1)), int(match.group(2))]))
 
     def parse_options(self, page):
         soup = BeautifulSoup(page, 'lxml')

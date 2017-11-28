@@ -1,4 +1,5 @@
 import sys
+
 from bs4 import BeautifulSoup
 
 from cloudomate.gateway import coinbase
@@ -50,7 +51,7 @@ class UndergroundPrivate(SolusvmHoster):
     def register(self, user_settings, vps_option):
         page = self.br.open(vps_option.purchase_url)
         if 'add' in page.geturl():
-            print 'Out of Stock'
+            print('Out of Stock')
             sys.exit(2)
         self.server_form(user_settings)
         self.br.open('https://www.clientlogin.sx/cart.php?a=view')

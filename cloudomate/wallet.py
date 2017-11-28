@@ -3,8 +3,9 @@
 import json
 import os
 import subprocess
-import urllib2
-from mechanize import Browser
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from forex_python.bitcoin import BtcConverter
 
@@ -21,7 +22,7 @@ def determine_currency(text):
     # Naive approach, for example NZ$ also contains $
     if '$' in text or 'usd' in text.lower():
         return 'USD'
-    elif u'€' in text or 'eur' in text.lower():
+    elif '€' in text or 'eur' in text.lower():
         return 'EUR'
     else:
         return None
@@ -47,7 +48,7 @@ def get_rate(currency='USD'):
 def fallback_get_rate(currency):
     # Sometimes the method above gets rate limited, in this case use
     # https: // blockchain.info / tobtc?currency = USD & value = 500
-    return float(urllib2.urlopen('https://blockchain.info/tobtc?currency={0}&value=1'.format(currency)).read())
+    return float(urllib.request.urlopen('https://blockchain.info/tobtc?currency={0}&value=1'.format(currency)).read())
 
 
 def get_rates(currencies):
@@ -151,7 +152,7 @@ class Wallet:
         transaction_hex = self.wallet_handler.create_transaction(amount, address, fee)
         success, transaction_hash = self.wallet_handler.broadcast(transaction_hex)
         if not success:
-            print('Transaction not successfully broadcast, do error handling: {0}'.format(transaction_hash))
+            print(('Transaction not successfully broadcast, do error handling: {0}'.format(transaction_hash)))
         else:
             print('Transaction successful')
         print(transaction_hex)

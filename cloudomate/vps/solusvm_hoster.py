@@ -1,4 +1,5 @@
 import sys
+
 from bs4 import BeautifulSoup
 
 from cloudomate.vps.hoster import Hoster
@@ -44,6 +45,7 @@ class SolusvmHoster(Hoster):
     def user_form(br, user_settings, payment_method, errorbox_class='checkout-error-feedback', acceptos=True):
         """
         Fills in the form with user information.
+        :param acceptos:
         :param errorbox_class: the class of the div containing error messages.
         :param payment_method: the payment method, typically coinbase or bitpay
         :param br: browser
@@ -70,7 +72,7 @@ class SolusvmHoster(Hoster):
         if 'checkout' in page.geturl():
             contents = BeautifulSoup(page.read(), 'lxml')
             errors = contents.find('div', {'class': errorbox_class}).text
-            print(errors.strip())
+            print((errors.strip()))
             sys.exit(2)
 
     @staticmethod
