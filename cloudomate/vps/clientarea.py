@@ -31,13 +31,11 @@ class ClientArea(object):
         :return: The clientarea homepage on succesful login.
         """
         self.browser.open(self.clientarea_url)
-        for form in list(self.browser.forms()):
-            if 'dologin' in form.action:
-                self.browser.form = form
-        self.browser.form['username'] = email
-        self.browser.form['password'] = password
-        page = self.browser.submit()
-        if "incorrect=true" in page.geturl():
+        self.browser.select_form('.logincontainer form')
+        self.browser['username'] = email
+        self.browser['password'] = password
+        page = self.browser.submit_selected()
+        if "incorrect=true" in page.url:
             print("Login failure")
             sys.exit(2)
         self.home_page = page
@@ -76,11 +74,11 @@ class ClientArea(object):
     def _services(self):
         if self.services is not None:
             return
-        services_page = self.browser.open(self.clientarea_url + "?action=services")
-        return self._extract_services(services_page.get_data())
+        self.browser.open(self.clientarea_url + "?action=services")
+        return self._extract_services(self.browser.get_current_page())
 
     def _extract_services(self, html):
-        soup = BeautifulSoup(html, 'lxml')
+        soup = html
         rows = soup.find('table', {'id': 'tableServicesList'}).tbody.findAll('tr')
         self.services = []
         for row in rows:
