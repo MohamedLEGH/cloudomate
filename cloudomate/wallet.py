@@ -178,7 +178,7 @@ class ElectrumWalletHandler(object):
                 wallet_command = ['/usr/bin/env', 'electrum']
         self.command = wallet_command
         p, e = subprocess.Popen(self.command + ['daemon', 'status'], stdout=subprocess.PIPE).communicate()
-        self.not_running_before = 'not running' in p
+        self.not_running_before = b'not running' in p
         if self.not_running_before:
             subprocess.call(self.command + ['daemon', 'start'])
         subprocess.call(self.command + ['daemon', 'load_wallet'])
@@ -206,7 +206,7 @@ class ElectrumWalletHandler(object):
         """
         Broadcast a transaction
         :param transaction: hex of transaction
-        :return: if successfull returns success and 
+        :return: if successful returns success and
         """
         broadcast = subprocess.check_output(self.command + ['broadcast', transaction])
         jbr = json.loads(str(broadcast))
