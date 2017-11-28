@@ -83,4 +83,4 @@ class SolusvmHoster(Hoster):
         :param form_id: the form element id
         :return: 
         """
-        browser.select_form(predicate=lambda f: 'id' in f.attrs and f.attrs['id'] == form_id)
+        browser.select_form('form#'+form_id)
