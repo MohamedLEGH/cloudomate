@@ -8,6 +8,7 @@ import urllib.parse
 import urllib.request
 
 from forex_python.bitcoin import BtcConverter
+from mechanicalsoup import StatefulBrowser
 
 AVG_TX_SIZE = 226
 SATOSHI_TO_BTC = 0.00000001
@@ -72,10 +73,9 @@ def get_price(amount, currency='USD'):
 
 
 def _get_network_cost(speed):
-    br = Browser()
-    br.addheaders = [('User-Agent', 'Firefox')]
+    br = StatefulBrowser(user_agent='Firefox')
     page = br.open('https://bitcoinfees.21.co/api/v1/fees/recommended')
-    rates = json.loads(page.read())
+    rates = json.loads(page.content)
     satoshirate = float(rates[speed])
     return satoshirate
 
