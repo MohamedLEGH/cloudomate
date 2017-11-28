@@ -1,8 +1,6 @@
 import itertools
 from collections import OrderedDict
 
-from bs4 import BeautifulSoup
-
 from cloudomate.gateway import coinbase
 from cloudomate.vps.clientarea import ClientArea
 from cloudomate.vps.solusvm_hoster import SolusvmHoster
@@ -32,8 +30,8 @@ class LegionBox(SolusvmHoster):
         super(LegionBox, self).__init__()
 
     def start(self):
-        hosting_page = self.br.open("https://legionbox.com/virtual-servers/")
-        soup = BeautifulSoup(hosting_page.get_data(), 'lxml')
+        self.br.open("https://legionbox.com/virtual-servers/")
+        soup = self.br.get_current_page()
         options = self.parse_options(soup.find('div', {'id': 'Linux'}).ul)
         options = itertools.chain(options, self.parse_options(soup.find('div', {'id': 'SSD-VPS'}).ul))
         return options
