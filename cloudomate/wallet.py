@@ -75,7 +75,8 @@ def get_price(amount, currency='USD'):
 def _get_network_cost(speed):
     br = StatefulBrowser(user_agent='Firefox')
     page = br.open('https://bitcoinfees.21.co/api/v1/fees/recommended')
-    satoshirate = float(page.json[speed])
+    response = page.json()
+    satoshirate = float(response[speed])
     return satoshirate
 
 
