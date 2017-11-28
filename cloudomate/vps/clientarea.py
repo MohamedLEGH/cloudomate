@@ -74,11 +74,11 @@ class ClientArea(object):
     def _services(self):
         if self.services is not None:
             return
-        self.browser.open(self.clientarea_url + "?action=services")
-        return self._extract_services(self.browser.get_current_page())
+        response = self.browser.open(self.clientarea_url + "?action=services")
+        return self._extract_services(response.content)
 
     def _extract_services(self, html):
-        soup = html
+        soup = BeautifulSoup(html, 'lxml')
         rows = soup.find('table', {'id': 'tableServicesList'}).tbody.findAll('tr')
         self.services = []
         for row in rows:
