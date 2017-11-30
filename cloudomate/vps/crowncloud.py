@@ -61,15 +61,15 @@ class CrownCloud(SolusvmHoster):
             self.select_form_id(self.br, 'orderfrm')
             self.fill_in_server_form(self.br.get_current_form(), user_settings, nameservers=False, rootpw=False, hostname=False)
             form = self.br.get_current_form();
-            form['configoption[1]'] = ['56']
-            form['configoption[8]'] = ['52']
-            form['configoption[9]'] = '0'
+            form.set('configoption[1]', '56')
+            form.set('configoption[8]','52')
+            form.set('configoption[9]', '0')
         except LinkNotFoundError:
             self.select_form_id(self.br, 'frmConfigureProduct')
             self.fill_in_server_form(self.br.get_current_form(), user_settings, nameservers=False, rootpw=False, hostname=False)
             print("Using classic form")
             pass
-        self.br.submit()
+        self.br.submit_selected()
 
     def start(self):
         self.br.open('http://crowncloud.net/openvz.php')
