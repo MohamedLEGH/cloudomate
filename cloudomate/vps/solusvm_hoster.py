@@ -37,8 +37,8 @@ class SolusvmHoster(Hoster):
         if nameservers:
             form['ns1prefix'] = user_settings.get('ns1')
             form['ns2prefix'] = user_settings.get('ns2')
-        form.new_control('text', 'ajax', {'name': 'ajax', 'value': 1})
-        form.new_control('text', 'a', {'name': 'a', 'value': 'confproduct'})
+        form.new_control('text', 'ajax', 1)
+        form.new_control('text', 'a', 'confproduct')
         form.method = "POST"
 
     @staticmethod
@@ -72,8 +72,11 @@ class SolusvmHoster(Hoster):
             form['accepttos'] = True
 
         soup = br.get_current_page()
-        submit = soup.select('input.ordernow')[0]
-        page = br.submit_selected(submit)
+        submit = soup.select('input.ordernow')
+        if len(submit):
+            page = br.submit_selected(submit[0])
+        else:
+            page = br.submit_selected()
 
         if 'checkout' in page.url:
             soup = BeautifulSoup(page.text, 'lxml')

@@ -4,6 +4,9 @@ import itertools
 import urllib.error
 import urllib.parse
 import urllib.request
+
+from mechanicalsoup.utils import LinkNotFoundError
+
 from collections import OrderedDict
 
 from cloudomate.gateway import bitpay
@@ -34,7 +37,7 @@ class LineVast(SolusvmHoster):
 
     def register(self, user_settings, vps_option):
         """
-        Register RockHoster provider, pay through CoinBase
+        Register Linevast provider, pay through CoinBase
         :param user_settings: 
         :param vps_option: 
         :return: 
@@ -42,25 +45,33 @@ class LineVast(SolusvmHoster):
         self.br.open(vps_option.purchase_url)
         self.server_form(user_settings)
         self.br.open('https://panel.linevast.de/cart.php?a=view')
-        self.br.follow_link(text_regex=r'Checkout')
-        self.br.select_form(name='orderfrm')
+
+        summary = self.br.get_current_page().find('div', class_='summary-container')
+        self.br.follow_link(summary.find('a', class_='btn-checkout'))
+
+        form = self.br.select_form(selector='form#frmCheckout')
+        user_settings.put('countrycode', 'US')  # TODO: Should be in user_settings
+        form['acceptdomainwiderruf1'] = True
+        form['acceptdomainwiderruf2'] = True
         self.user_form(self.br, user_settings, self.gateway.name)
-        self.br.select_form(nr=0)
-        page = self.br.submit()
-        return self.gateway.extract_info(page.geturl())
+
+        self.br.select_form(nr=0)  # Go to payment form
+        self.br.submit_selected()
+
+        return self.gateway.extract_info(self.br.get_url())
 
     def server_form(self, user_settings):
         """
         Fills in the form containing server configuration.
         :return: 
         """
-        self.select_form_id(self.br, 'frmConfigureProduct')
-        self.fill_in_server_form(self.br.form, user_settings, rootpw=False, hostname=False, nameservers=False)
+        form = self.br.select_form('form#frmConfigureProduct')
+        self.fill_in_server_form(form, user_settings, rootpw=False, hostname=False, nameservers=False)
         try:
-            self.br.form['configoption[61]'] = ['657']  # Ubuntu 16.04
-        except ControlNotFoundError:
-            self.br.form['configoption[125]'] = ['549']  # Ubuntu 16.04
-        self.br.submit()
+            form['configoption[61]'] = '657'  # Ubuntu 16.04
+        except LinkNotFoundError:
+            form['configoption[125]'] = '549'  # Ubuntu 16.04
+        self.br.submit_selected()
 
     def start(self):
         """
