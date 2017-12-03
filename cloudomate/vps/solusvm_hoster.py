@@ -52,26 +52,32 @@ class SolusvmHoster(Hoster):
         :param user_settings: settings
         :return: 
         """
-        br.form['firstname'] = user_settings.get("firstname")
-        br.form['lastname'] = user_settings.get("lastname")
-        br.form['email'] = user_settings.get("email")
-        br.form['phonenumber'] = user_settings.get("phonenumber")
-        br.form['companyname'] = user_settings.get("companyname")
-        br.form['address1'] = user_settings.get("address")
-        br.form['city'] = user_settings.get("city")
-        br.form['state'] = user_settings.get("state")
-        br.form['postcode'] = user_settings.get("zipcode")
-        br.form['country'] = [user_settings.get('countrycode')]
-        br.form['password'] = user_settings.get("password")
-        br.form['password2'] = user_settings.get("password")
-        br.form['paymentmethod'] = [payment_method]
+        form = br.get_current_form()
+        form['firstname'] = user_settings.get("firstname")
+        form['lastname'] = user_settings.get("lastname")
+        form['email'] = user_settings.get("email")
+        form['phonenumber'] = user_settings.get("phonenumber")
+        form['companyname'] = user_settings.get("companyname")
+        form['address1'] = user_settings.get("address")
+        form['city'] = user_settings.get("city")
+        form['state'] = user_settings.get("state")
+        form['postcode'] = user_settings.get("zipcode")
+        #form['country'] = [user_settings.get('countrycode')]
+        #form.set('country', [user_settings.get('countrycode')])
+        form['country'] = user_settings.get('countrycode')
+        form['password'] = user_settings.get("password")
+        form['password2'] = user_settings.get("password")
+        form['paymentmethod'] = payment_method
         if acceptos:
-            br.find_control('accepttos').items[0].selected = True
+            form['accepttos'] = True
 
-        page = br.submit()
-        if 'checkout' in page.geturl():
-            contents = BeautifulSoup(page.read(), 'lxml')
-            errors = contents.find('div', {'class': errorbox_class}).text
+        soup = br.get_current_page()
+        submit = soup.select('input.ordernow')[0]
+        page = br.submit_selected(submit)
+
+        if 'checkout' in page.url:
+            soup = BeautifulSoup(page.text, 'lxml')
+            errors = soup.find('div', {'class': errorbox_class}).text
             print((errors.strip()))
             sys.exit(2)
 
