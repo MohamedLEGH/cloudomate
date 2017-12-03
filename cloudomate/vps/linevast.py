@@ -1,5 +1,6 @@
 import json
 import sys
+import itertools
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -68,12 +69,14 @@ class LineVast(SolusvmHoster):
         :return: possible configurations.
         """
         self.br.open("https://linevast.de/en/offers/ddos-protected-vps-hosting.html")
-        return self.parse_options(self.br.get_current_page())
+        options = self.parse_openvz_hosting(self.br.get_current_page())
 
-        # kvm_hosting_page = self.br.open("https://linevast.de/angebote/kvm-vserver-mieten.html")
-        # options = itertools.chain(options, self.parse_kvm_hosting(kvm_hosting_page.get_data()))
+        self.br.open("https://linevast.de/en/offers/windows-vps-hosting.html")
+        options = itertools.chain(options, self.parse_kvm_hosting(self.br.get_current_page()))
 
-    def parse_options(self, page):
+        return options
+
+    def parse_openvz_hosting(self, page):
         table = page.find('table', {'class': 'plans-block'})
         details = table.tbody.tr
         names = table.findAll('div', {'class': 'plans-title'})
@@ -101,12 +104,11 @@ class LineVast(SolusvmHoster):
         return option
 
     def parse_kvm_hosting(self, page):
-        soup = BeautifulSoup(page, "lxml")
-        table = soup.find('table', {'class': 'plans-block'})
+        table = page.find('table', {'class': 'plans-block'})
         details = table.tbody.tr
         names = table.findAll('div', {'class': 'plans-title'})
         i = 0
-        for plan in details.findAll('div', {'class': 'plans-content'})[1:]:
+        for plan in details.findAll('div', {'class': 'plans-content'}):
             name = names[i].text.strip() + ' KVM'
             option = self.parse_kvm_option(plan, name)
             i = i + 1
