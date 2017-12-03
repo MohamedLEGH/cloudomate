@@ -5,8 +5,6 @@ import urllib.parse
 import urllib.request
 from collections import OrderedDict
 
-from bs4 import BeautifulSoup
-
 from cloudomate.gateway import bitpay
 from cloudomate.vps.clientarea import ClientArea
 from cloudomate.vps.solusvm_hoster import SolusvmHoster
@@ -66,23 +64,21 @@ class LineVast(SolusvmHoster):
     def start(self):
         """
         Linux (OpenVZ) and Windows (KVM) pages are slightly different, therefore their pages are parsed by different 
-        methoods. Windows configurations allow a selection of Linux distributions, but not vice-versa.
+        methods. Windows configurations allow a selection of Linux distributions, but not vice-versa.
         :return: possible configurations.
         """
-        openvz_hosting_page = self.br.open("https://linevast.de/angebote/linux-openvz-vserver-mieten.html")
-        options = self.parse_openvz_hosting(openvz_hosting_page.get_data())
+        self.br.open("https://linevast.de/en/offers/ddos-protected-vps-hosting.html")
+        return self.parse_options(self.br.get_current_page())
 
         # kvm_hosting_page = self.br.open("https://linevast.de/angebote/kvm-vserver-mieten.html")
         # options = itertools.chain(options, self.parse_kvm_hosting(kvm_hosting_page.get_data()))
-        return options
 
-    def parse_openvz_hosting(self, page):
-        soup = BeautifulSoup(page, "lxml")
-        table = soup.find('table', {'class': 'plans-block'})
+    def parse_options(self, page):
+        table = page.find('table', {'class': 'plans-block'})
         details = table.tbody.tr
         names = table.findAll('div', {'class': 'plans-title'})
         i = 0
-        for plan in details.findAll('div', {'class': 'plans-content'})[1:]:
+        for plan in details.findAll('div', {'class': 'plans-content'}):
             name = names[i].text.strip() + ' OVZ'
             option = self.parse_openvz_option(plan, name)
             i = i + 1
