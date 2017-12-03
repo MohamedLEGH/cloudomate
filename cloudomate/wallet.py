@@ -97,14 +97,14 @@ class Wallet:
     Wallets with passwords may still be used, but passwords will have to be entered manually.
     """
 
-    def __init__(self, wallet_command=None):
+    def __init__(self, wallet_command=None, wallet_path=None):
         if wallet_command is None:
             if os.path.exists('/usr/local/bin/electrum'):
                 wallet_command = ['/usr/local/bin/electrum']
             else:
                 wallet_command = ['/usr/bin/env', 'electrum']
         self.command = wallet_command
-        self.wallet_handler = ElectrumWalletHandler(wallet_command)
+        self.wallet_handler = ElectrumWalletHandler(wallet_command, wallet_path)
 
     def get_balance(self, confirmed=True, unconfirmed=True):
         """
@@ -166,7 +166,7 @@ class ElectrumWalletHandler(object):
     ElectrumWalletHandler ensures the correct opening and closing of the electrum wallet daemon
     """
 
-    def __init__(self, wallet_command=None):
+    def __init__(self, wallet_command=None, wallet_path=None):
         """
         Allows wallet_command to be changed to for example electrum --testnet
         :param wallet_command: command to call wallet
@@ -181,7 +181,11 @@ class ElectrumWalletHandler(object):
         self.not_running_before = b'not running' in p
         if self.not_running_before:
             subprocess.call(self.command + ['daemon', 'start'])
-        subprocess.call(self.command + ['daemon', 'load_wallet'])
+        if wallet_path == None:
+            subprocess.call(self.command + ['daemon', 'load_wallet'])
+        else:
+            print('Using wallet: ', wallet_path)
+            subprocess.call(self.command + ['daemon', 'load_wallet', '-w', wallet_path])
 
     def __del__(self):
         if self.not_running_before:
