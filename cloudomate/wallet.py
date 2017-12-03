@@ -185,7 +185,7 @@ class ElectrumWalletHandler(object):
             subprocess.call(self.command + ['daemon', 'load_wallet'])
         else:
             print('Using wallet: ', wallet_path)
-            output = subprocess.call(self.command + ['daemon', 'load_wallet', '-w', wallet_path])
+            subprocess.call(self.command + ['daemon', 'load_wallet', '-w', wallet_path])
 
     def __del__(self):
         if self.not_running_before:
