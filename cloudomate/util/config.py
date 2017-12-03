@@ -22,6 +22,7 @@ class UserOptions(object):
             self._merge(cp, "User")
             self._merge(cp, "Address")
             self._merge(cp, "Server")
+            self._merge(cp, "Electrum")
             if provider:
                 self._merge(cp, provider)
         except NoSectionError as e:
