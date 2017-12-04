@@ -1,7 +1,5 @@
 from collections import OrderedDict
 
-from bs4 import BeautifulSoup
-
 from cloudomate.gateway import coinbase
 from cloudomate.vps.clientarea import ClientArea
 from cloudomate.vps.solusvm_hoster import SolusvmHoster
@@ -40,25 +38,38 @@ class CCIHosting(SolusvmHoster):
         :return: 
         """
         self.br.open(vps_option.purchase_url)
-        self.server_form(user_settings)
+        self.server_form(user_settings)  # Add item to cart
         self.br.open('https://www.ccihosting.com/accounts/cart.php?a=confdomains')
-        self.br.follow_link(text_regex="Checkout")
-        self.br.select_form(nr=2)
+
+        summary = self.br.get_current_page().find('div', class_='summary-container')
+        self.br.follow_link(summary.find('a', class_='btn-checkout'))
+
+        self.br.select_form(selector='form[name=orderfrm]')
+        user_settings.put('countrycode', 'US')  # TODO: Should be in user_settings
         self.user_form(self.br, user_settings, self.gateway.name)
-        self.br.select_form(nr=0)
-        coinbase_url = self.br.form.attrs.get('action')
+
+        coinbase_url = self.br.get_current_page().find('form')['action']
         return self.gateway.extract_info(coinbase_url)
 
     def server_form(self, user_settings):
         """
-        Fills in the form containing server configuration
+        Using a form does for some reason not work, so use post request
         :param user_settings: settings
         :return: 
         """
-        self.select_form_id(self.br, 'frmConfigureProduct')
-        self.fill_in_server_form(self.br.form, user_settings)
-        self.br.form['configoption[214]'] = ['1193']  # Ubuntu
-        self.br.submit()
+        self.br.post('https://www.ccihosting.com/accounts/cart.php', {
+            'ajax': '1',
+            'a': 'confproduct',
+            'configure': 'true',
+            'i': '0',
+            'billingcycle': 'monthly',
+            'hostname': user_settings.get('hostname'),
+            'rootpw': user_settings.get('rootpw'),
+            'ns1prefix': user_settings.get('ns1'),
+            'ns2prefix': user_settings.get('ns2'),
+            'configoption[214]': '1193',  # Ubuntu 16.04
+            'configoption[258]': '955',
+        })
 
     def start(self):
         self.br.open('https://www.ccihosting.com/offshore-vps.html')
