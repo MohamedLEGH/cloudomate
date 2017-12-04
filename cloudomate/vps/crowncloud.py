@@ -57,20 +57,35 @@ class CrownCloud(SolusvmHoster):
         Fills in the form containing server configuration.
         :return: 
         """
-        try:
-            self.select_form_id(self.br, 'orderfrm')
-            self.fill_in_server_form(self.br.get_current_form(), user_settings, nameservers=False, rootpw=False, hostname=False)
-            form = self.br.get_current_form();
-            form.set('configoption[1]', '56')
-            form.set('configoption[8]','52')
-            form.set('configoption[9]', '0')
-        except LinkNotFoundError:
-            self.select_form_id(self.br, 'frmConfigureProduct')
-            self.fill_in_server_form(self.br.get_current_form(), user_settings, nameservers=False, rootpw=False, hostname=False)
-            print("Using classic form")
-            pass
-        self.br.submit_selected()
+        resp = self.br.post(url = 'https://crowncloud.net/clients/cart.php',
+                     data={
+                         'ajax': '0',
+                         'a': 'confproduct',
+                         'calctotal':'true',
+                         'configure':'true',
+                         'i':'0',
+                         'billingcycle':'monthly',
+                         'configoption[1]':	'56',
+                         'configoption[8]': '52',
+                         'configoption[9]': '0'} )
+        self.br._prepare_request()
+        #self.br.launch_browser()
 
+        # try:
+        #     self.select_form_id(self.br, 'orderfrm')
+        #     self.fill_in_server_form(self.br.get_current_form(), user_settings, nameservers=False, rootpw=False, hostname=False)
+        #     form = self.br.get_current_form()
+        #     form['configoption[1]'] = '56'
+        #     form['configoption[8]']= '52'
+        #     form['configoption[9]']= '0'
+        # except LinkNotFoundError:
+        #     self.select_form_id(self.br, 'frmConfigureProduct')
+        #     self.fill_in_server_form(self.br.get_current_form(), user_settings, nameservers=False, rootpw=False, hostname=False)
+        #     print("Using classic form")
+        #     pass
+        # self.br.launch_browser()
+        resp = self.br.submit_selected()
+        print(resp.get_url())
     def start(self):
         self.br.open('http://crowncloud.net/openvz.php')
         return self.parse_options(self.br.get_current_page())
