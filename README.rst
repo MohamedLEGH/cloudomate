@@ -38,12 +38,13 @@ Providers
 
 Currently the following VPS providers are implemented: ::
 
-   linevast       https://linevast.de/
-   pulseservers   https://pulseservers.com/
-   rockhoster     https://rockhoster.com/
    blueangelhost  https://www.blueangelhost.com/
    ccihosting     http://www.ccihosting.com/
    crowncloud     http://crowncloud.net/
+   legionbox      https://legionbox.com/
+   linevast       https://linevast.de/
+   pulseservers   https://pulseservers.com/
+   underground    https://undergroundprivate.com
 
 This same list can be accessed through the list command. ::
 
@@ -82,8 +83,8 @@ A configuration file looks like this ::
 
 
 Section can be overridden for specific providers by adding a section,
-for example a [rockhoster] section can contain a separate email address only
-to be used for RockHoster.
+for example a [linevast] section can contain a separate email address only
+to be used for Linevast_.
 
 
 Basic usage
@@ -111,24 +112,24 @@ Basic usage
 options
 -------
 
-List the options for RockHoster_ ::
+List the options for Linevast_ ::
     
     
-    $ cloudomate options rockhoster
+   $ cloudomate options linevast
 
 ::
     
-    Options for rockhoster:
+   Options for linevast:
 
-      #    Name              CPU (cores)       RAM (GB)          Storage (GB)      Bandwidth (TB)    Connection (Mbps) Estimated Price (mBTC)
-      0    Basic              1                1                 25                unmetered         500               3.47
-      1    Premium            2                2                 50                unmetered         500               5.27
-      2    Expert             3                4                 100               unmetered         500               9.3
-      3    Maximum            4                8                 150               unmetered         500               16.25
-      4    Basic              2                1                 40                unmetered         1000              5.27
-      5    Premium            2                2                 80                unmetered         1000              8.41
-      6    Expert             3                4                 150               unmetered         1000              14.23
-      7    Maximum            4                8                 300               unmetered         1000              24.54
+      #    Name              CPU (cores)       RAM (GB)          Storage (GB)      Bandwidth (TB)    Connection (Mbps) Est. Price (mBTC) Price
+      0    Basis OVZ         1                 2                 50                unmetered         1000              1.03              EUR 6.99
+      1    Business OVZ      2                 4                 150               unmetered         1000              1.64              EUR 12.99
+      2    Advanced OVZ      4                 8                 300               unmetered         1000              2.35              EUR 19.99
+      3    Black OVZ         8                 16                1000              unmetered         1000              2.96              EUR 25.99
+      4    Basic KVM         1                 2                 30                unmetered         1000              1.03              EUR 6.99
+      5    Business KVM      2                 4                 50                unmetered         1000              1.64              EUR 12.99
+      6    Advanced KVM      4                 8                 75                unmetered         1000              2.96              EUR 25.99
+      7    Black KVM         6                 16                100               unmetered         1000              4.18              EUR 37.99
 
 
 Purchase
@@ -137,13 +138,13 @@ Purchase
 Use the purchase command to purchase a VPS instance. An account is created
 and the instance is paid through an Electrum wallet. ::
    
-   $ cloudomate purchase rockhoster 0
+   $ cloudomate purchase linevast 0
   
 ::
 
    Selected configuration:
    Name           CPU            RAM            Storage        Bandwidth      Est.Price
-   Basic          1              1.0            25.0           unmetered      4.99
+   Basis OVZ      1              2              50             unmetered      6.99
    Purchase this option? (y/N)
 
 Manage
@@ -166,5 +167,5 @@ To run the project's tests   ::
 
 
 
-.. _RockHoster: https://rockhoster.com/
+.. _Linevast: https://linevast.de/en/
 .. _Electrum: https://electrum.org/
