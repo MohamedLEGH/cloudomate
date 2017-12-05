@@ -1,8 +1,7 @@
 import sys
 
 from bs4 import BeautifulSoup
-
-from cloudomate.vps.hoster import Hoster
+from cloudomate.hoster.vps.hoster import Hoster
 
 
 class SolusvmHoster(Hoster):

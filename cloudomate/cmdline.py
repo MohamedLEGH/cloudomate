@@ -2,14 +2,14 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 
+from cloudomate.hoster.vps.ccihosting import CCIHosting
+from cloudomate.hoster.vps.blueangelhost import BlueAngelHost
+from cloudomate.hoster.vps.crowncloud import CrownCloud
+from cloudomate.hoster.vps.legionbox import LegionBox
+from cloudomate.hoster.vps.linevast import LineVast
+from cloudomate.hoster.vps.pulseservers import Pulseservers
+from cloudomate.hoster.vps.undergroundprivate import UndergroundPrivate
 from cloudomate.util.config import UserOptions
-from cloudomate.vps.blueangelhost import BlueAngelHost
-from cloudomate.vps.ccihosting import CCIHosting
-from cloudomate.vps.crowncloud import CrownCloud
-from cloudomate.vps.legionbox import LegionBox
-from cloudomate.vps.linevast import LineVast
-from cloudomate.vps.pulseservers import Pulseservers
-from cloudomate.vps.undergroundprivate import UndergroundPrivate
 from cloudomate.wallet import Wallet
 
 commands = ["options", "purchase", "list"]

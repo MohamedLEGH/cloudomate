@@ -1,12 +1,11 @@
 import unittest
 from argparse import Namespace
 
-from mock.mock import MagicMock
-
 import cloudomate.cmdline as cmdline
+from cloudomate.hoster.vps.linevast import LineVast
+from cloudomate.hoster.vps.vpsoption import VpsOption
 from cloudomate.util.config import UserOptions
-from cloudomate.vps.linevast import LineVast
-from cloudomate.vps.vpsoption import VpsOption
+from mock.mock import MagicMock
 
 
 class TestCmdLine(unittest.TestCase):
