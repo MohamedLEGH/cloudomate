@@ -71,9 +71,7 @@ class SolusvmHoster(Hoster):
         if acceptos:
             form['accepttos'] = True
 
-        soup = br.get_current_page()
-        submit = soup.select('input.ordernow')[0]
-        page = br.submit_selected(submit)
+        page = br.submit_selected()
 
         if 'checkout' in page.url:
             soup = BeautifulSoup(page.text, 'lxml')

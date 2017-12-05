@@ -104,6 +104,10 @@ class Pulseservers(SolusvmHoster):
         form = self.br.get_current_form()
         #promobutton = form.find_control(name="validatepromo")
         #promobutton.disabled = True
+        soup = self.br.get_current_page()
+        submit = soup.select('input.ordernow')[0]
+        form.choose_submit(submit)
+
         self.user_form(self.br, user_settings, self.gateway.name, errorbox_class='errorbox')
         self.br.select_form(nr=0)
         page = self.br.submit_selected()
