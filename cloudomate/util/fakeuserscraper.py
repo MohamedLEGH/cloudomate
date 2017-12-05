@@ -1,7 +1,7 @@
 from mechanicalsoup import StatefulBrowser
 
 
-class userScraper:
+class UserScraper:
     """
     Scrapes fakeadressgenerator.com for fake user data,
     """
@@ -24,7 +24,7 @@ class userScraper:
 
     def __init__(self, country='NL'):
         self.br = StatefulBrowser()
-        self.page = userScraper.pages.get(country)
+        self.page = UserScraper.pages.get(country)
 
 
     def get_user(self):
@@ -40,8 +40,8 @@ class userScraper:
         config = {}
         # Treat full name separately because it needs to be split
         if 'Full Name' in attrs:
-            config['firstName'] = attrs['Full Name'].split('\xa0')[0]
-            config['lastName'] = attrs['Full Name'].split('\xa0')[-1]
+            config['firstname'] = attrs['Full Name'].split('\xa0')[0]
+            config['lastname'] = attrs['Full Name'].split('\xa0')[-1]
 
         # Map the possible user attributes to their config names
         mapping = {
@@ -49,8 +49,8 @@ class userScraper:
             'City': 'city',
             'State Full': 'state',
             'Zip Code': 'zipcode',
-            'Phone Number': 'phoneNumber',
-            'Company': 'companyName',
+            'Phone Number': 'phonenumber',
+            'Company': 'companyname',
         }
 
         for attr in attrs.keys():
