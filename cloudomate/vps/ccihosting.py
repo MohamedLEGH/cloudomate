@@ -45,7 +45,6 @@ class CCIHosting(SolusvmHoster):
         self.br.follow_link(summary.find('a', class_='btn-checkout'))
 
         self.br.select_form(selector='form[name=orderfrm]')
-        user_settings.put('countrycode', 'US')  # TODO: Should be in user_settings
         self.user_form(self.br, user_settings, self.gateway.name)
 
         coinbase_url = self.br.get_current_page().find('form')['action']

@@ -48,7 +48,6 @@ class BlueAngelHost(SolusvmHoster):
 
         self.br.select_form(selector='form[name=orderfrm]')
         self.br.get_current_form()['customfield[4]'] = 'Google'
-        user_settings.put('countrycode', 'US')  # TODO: Should be in user_settings
         self.user_form(self.br, user_settings, self.gateway.name)
 
         self.br.select_form(nr=0)
