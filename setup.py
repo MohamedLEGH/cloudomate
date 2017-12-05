@@ -43,7 +43,7 @@ setup(
 
     packages=find_packages(exclude=['docs', 'test']),
 
-    install_requires=['appdirs', 'MechanicalSoup', 'bs4', 'mock', 'forex_python', 'parameterized'],
+    install_requires=['appdirs', 'MechanicalSoup', 'bs4', 'mock', 'forex-python', 'parameterized'],
 
     extras_require={
         'dev': [],
