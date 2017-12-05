@@ -40,7 +40,6 @@ class CrownCloud(SolusvmHoster):
         :param vps_option: 
         :return: 
         """
-        self.br.open("https://crowncloud.net")
         self.br.open(vps_option.purchase_url)
         self.server_form(user_settings)
         self.br.open('https://crowncloud.net/clients/cart.php?a=view')
@@ -48,11 +47,15 @@ class CrownCloud(SolusvmHoster):
         form = self.br.get_current_form()
         #promobutton = self.br.get_current_form().find_control(type="submitbutton", nr=0)
         #promobutton.disabled = True
-        form.choose_submit('btnCompleteOrder')
+
+        soup = self.br.get_current_page()
+        submit = soup.select('button#btnCompleteOrder')[0]
+        form.choose_submit(submit)
+
         self.user_form(self.br, user_settings, self.gateway.name, errorbox_class='errorbox')
         self.br.select_form(nr=0)
         page = self.br.submit_selected()
-        return self.gateway.extract_info(page.geturl())
+        return self.gateway.extract_info(page.url)
 
     def server_form(self, user_settings):
         """
@@ -76,6 +79,7 @@ class CrownCloud(SolusvmHoster):
             print("Using classic form")
             pass
         resp = self.br.submit_selected()
+
     def start(self):
         self.br.open('http://crowncloud.net/openvz.php')
         return self.parse_options(self.br.get_current_page())
