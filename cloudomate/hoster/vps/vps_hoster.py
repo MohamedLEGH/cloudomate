@@ -8,15 +8,6 @@ class VpsHoster(Hoster):
     configurations = None
     client_area = None
 
-    def __init__(self):
-        """
-        Initialize hoster object common variables
-         configurations holds the vps options available
-         br holds the stateful mechanize browser
-        """
-        super(VpsHoster, self).__init__()
-        self.configurations = None
-
     def options(self):
         """
         Retrieve hosting options at Hoster.
@@ -25,6 +16,9 @@ class VpsHoster(Hoster):
         options = self.start()
         self.configurations = list(options)
         return self.configurations
+
+    def start(self):
+        raise NotImplementedError('Abstract method implementation')
 
     def purchase(self, user_settings, options, wallet):
         """

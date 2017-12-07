@@ -49,10 +49,10 @@ class Hoster(object):
         """
         self.br = self._create_browser()
 
-    def start(self):
+    def options(self):
         raise NotImplementedError('Abstract method implementation')
 
-    def purchase(self, user_settings, options, wallet):
+    def purchase(self, *args, **kwargs):
         raise NotImplementedError('Abstract method implementation')
 
     @classmethod
