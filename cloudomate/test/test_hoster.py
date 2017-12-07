@@ -1,6 +1,6 @@
 import unittest
 
-import cloudomate.hoster.vps.hoster
+import cloudomate.hoster.vps.vps_hoster
 from cloudomate import wallet
 from cloudomate.hoster.vps.blueangelhost import BlueAngelHost
 from cloudomate.hoster.vps.ccihosting import CCIHosting

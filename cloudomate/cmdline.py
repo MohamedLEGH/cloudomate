@@ -267,7 +267,7 @@ def _register(p, vps_option, user_settings):
     else:
         wallet = Wallet()
 
-    p.purchase(user_settings=user_settings, vps_option=vps_option, wallet=wallet)
+    p.purchase(user_settings=user_settings, options=vps_option, wallet=wallet)
 
 
 def _get_provider(args):

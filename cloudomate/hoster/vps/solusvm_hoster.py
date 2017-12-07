@@ -1,10 +1,10 @@
 import sys
 
 from bs4 import BeautifulSoup
-from cloudomate.hoster.vps.hoster import Hoster
+from cloudomate.hoster.vps.vps_hoster import VpsHoster
 
 
-class SolusvmHoster(Hoster):
+class SolusvmHoster(VpsHoster):
     def get_status(self, user_settings):
         raise NotImplementedError('Abstract method implementation')
 
