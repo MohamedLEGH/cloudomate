@@ -181,7 +181,7 @@ class ElectrumWalletHandler(object):
         self.not_running_before = b'not running' in p
         if self.not_running_before:
             subprocess.call(self.command + ['daemon', 'start'])
-        if wallet_path == None:
+        if wallet_path is None:
             subprocess.call(self.command + ['daemon', 'load_wallet'])
         else:
             print('Using wallet: ', wallet_path)

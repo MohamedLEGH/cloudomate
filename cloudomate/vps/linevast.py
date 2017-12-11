@@ -50,7 +50,6 @@ class LineVast(SolusvmHoster):
         self.br.follow_link(summary.find('a', class_='btn-checkout'))
 
         form = self.br.select_form(selector='form#frmCheckout')
-        user_settings.put('countrycode', 'US')  # TODO: Should be in user_settings
         form['acceptdomainwiderruf1'] = True
         form['acceptdomainwiderruf2'] = True
         self.user_form(self.br, user_settings, self.gateway.name)

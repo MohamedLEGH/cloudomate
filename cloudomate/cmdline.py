@@ -10,20 +10,18 @@ from cloudomate.vps.crowncloud import CrownCloud
 from cloudomate.vps.legionbox import LegionBox
 from cloudomate.vps.linevast import LineVast
 from cloudomate.vps.pulseservers import Pulseservers
-from cloudomate.vps.rockhoster import RockHoster
 from cloudomate.vps.undergroundprivate import UndergroundPrivate
 from cloudomate.wallet import Wallet
 
 commands = ["options", "purchase", "list"]
 providers = {
-    "rockhoster": RockHoster(),
-    'pulseservers': Pulseservers(),
-    "crowncloud": CrownCloud(),
     "blueangelhost": BlueAngelHost(),
     "ccihosting": CCIHosting(),
-    "linevast": LineVast(),
-    "underground": UndergroundPrivate(),
+    "crowncloud": CrownCloud(),
     "legionbox": LegionBox(),
+    "linevast": LineVast(),
+    'pulseservers': Pulseservers(),
+    "underground": UndergroundPrivate(),
 }
 
 
@@ -216,7 +214,8 @@ def _purchase(p, vps_option, user_settings):
         str(vps_option.storage),
         str(vps_option.bandwidth),
         str(vps_option.price))))
-    if user_settings.get("noconfirm") is not None and user_settings.get("noconfirm") is True:
+
+    if 'walletpath' in user_settings.config and user_settings.get("noconfirm") is True:
         choice = True
     else:
         choice = _confirmation("Purchase this option?", default="no")
