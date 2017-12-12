@@ -102,7 +102,7 @@ class ClientArea(object):
 
     def _get_vserverid(self, url):
         page = self.browser.open(url)
-        match = re.search(r'vserverid = (\d+)', page.get_data())
+        match = re.search(r'vserverid = (\d+)', page.text)
         return match.group(1)
 
     def get_client_data_ip(self, client_data_url):
@@ -164,7 +164,7 @@ class ClientArea(object):
                                     '&newrootpassword=%s&ajax=1&ac=Custom_ChangeRootPassword&_=%s' \
                                     % (service['id'], vserverid, password, millis)
         response = self.browser.open(url)
-        response_json = json.loads(response.get_data())
+        response_json = json.loads(response.text)
         if response_json['success'] is True:
             print("Password changed successfully")
             return True
@@ -207,7 +207,7 @@ class ClientArea(object):
         service = self.get_specified_or_active_service()
         self._ensure_active(service)
         page = self.browser.open(service['url'])
-        return self._extract_service_info(page.get_data())
+        return self._extract_service_info(page.text)
 
     def get_ip(self):
         """
