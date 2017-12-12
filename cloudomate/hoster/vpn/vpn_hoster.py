@@ -10,14 +10,28 @@ class VpnHoster(Hoster):
         super(VpnHoster, self).__init__()
 
         self.name = None
+        self.website = None
         self.protocol = None
         self.price = None
         self.bandwidth = None
         self.speed = None
 
+    def info(self, user_settings):
+        """
+        This function should display information on the VPN service such as
+        :return:
+        """
+        raise NotImplementedError('Abstract method implementation')
+
     def purchase(self, user_settings, wallet):
         """
         This function should actually buy a vps server with the specified wallet and provided credentials.
+        """
+        raise NotImplementedError('Abstract method implementation')
+
+    def get_status(self, user_settings):
+        """
+        This function should provide the status of the last activated VPN subscription.
         """
         raise NotImplementedError('Abstract method implementation')
 

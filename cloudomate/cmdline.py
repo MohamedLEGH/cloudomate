@@ -13,51 +13,83 @@ from cloudomate.util.config import UserOptions
 from cloudomate.wallet import Wallet
 
 commands = ["options", "purchase", "list"]
+types = ["vps", "vpn"]
 providers = {
-    "blueangelhost": BlueAngelHost(),
-    "ccihosting": CCIHosting(),
-    "crowncloud": CrownCloud(),
-    "legionbox": LegionBox(),
-    "linevast": LineVast(),
-    'pulseservers': Pulseservers(),
-    "underground": UndergroundPrivate(),
+    "vps": {
+        "blueangelhost": BlueAngelHost(),
+        "ccihosting": CCIHosting(),
+        "crowncloud": CrownCloud(),
+        "legionbox": LegionBox(),
+        "linevast": LineVast(),
+        'pulseservers': Pulseservers(),
+        "underground": UndergroundPrivate(),
+    },
+    "vpn": {
+        # TODO: Add actual VPN Providers
+    }
 }
 
 
 def execute(cmd=sys.argv[1:]):
     parser = ArgumentParser(description="Cloudomate")
 
-    subparsers = parser.add_subparsers(dest="command")
-    add_parser_list(subparsers)
-    add_parser_options(subparsers)
-    add_parser_purchase(subparsers)
-    add_parser_status(subparsers)
-    add_parser_setrootpw(subparsers)
-    add_parser_get_ip(subparsers)
-    add_parser_ssh(subparsers)
-    add_parser_info(subparsers)
+    subparsers = parser.add_subparsers(dest="type")
+    add_vps_parsers(subparsers)
+    add_vpn_parsers(subparsers)
     subparsers.required = True
 
     args = parser.parse_args(cmd)
     args.func(args)
 
 
-def add_parser_list(subparsers):
-    parser_list = subparsers.add_parser("list", help="List providers")
+def add_vpn_parsers(subparsers):
+    vpn_parsers = subparsers.add_parser("vpn")
+    vpn_parsers.set_defaults(type="vpn")
+    vpn_subparsers = vpn_parsers.add_subparsers(dest="command")
+    vpn_subparsers.required = True
+
+    add_parser_list(vpn_subparsers, "vpn")
+    add_parser_purchase(vpn_subparsers, "vpn")
+    add_parser_status(vpn_subparsers, "vpn")
+    add_parser_info(vpn_subparsers, "vpn")
+
+
+def add_vps_parsers(subparsers):
+    vps_parsers = subparsers.add_parser("vps")
+    vps_parsers.set_defaults(type="vps")
+    vps_subparsers = vps_parsers.add_subparsers(dest="command")
+    vps_subparsers.required = True
+
+    add_parser_list(vps_subparsers, "vps")
+    add_parser_vps_options(vps_subparsers)
+    add_parser_purchase(vps_subparsers, "vps")
+    add_parser_status(vps_subparsers, "vps")
+    add_parser_vps_setrootpw(vps_subparsers)
+    add_parser_vps_get_ip(vps_subparsers)
+    add_parser_vps_ssh(vps_subparsers)
+    add_parser_info(vps_subparsers, "vps")
+
+
+def add_parser_list(subparsers, provider_type):
+    parser_list = subparsers.add_parser("list", help="List %s providers" % provider_type.upper())
     parser_list.set_defaults(func=list_providers)
 
 
-def add_parser_options(subparsers):
-    parser_options = subparsers.add_parser("options", help="List provider configurations")
-    parser_options.add_argument("provider", help="The specified provider", choices=providers)
+def add_parser_vps_options(subparsers):
+    parser_options = subparsers.add_parser("options", help="List VPS provider configurations")
+    parser_options.add_argument("provider", help="The specified VPS provider", choices=providers['vps'])
     parser_options.set_defaults(func=options)
 
 
-def add_parser_purchase(subparsers):
-    parser_purchase = subparsers.add_parser("purchase", help="Purchase VPS")
+def add_parser_purchase(subparsers, provider_type):
+    parser_purchase = subparsers.add_parser("purchase", help="Purchase %s" % provider_type.upper())
     parser_purchase.set_defaults(func=purchase)
-    parser_purchase.add_argument("provider", help="The specified provider", choices=providers)
-    parser_purchase.add_argument("option", help="The VPS option number (see options)", type=int)
+    parser_purchase.add_argument("provider", help="The specified provider", choices=providers[provider_type])
+
+    if provider_type == 'vps':
+        parser_purchase.add_argument("option", help="The %s option number (see options)" % provider_type.upper(),
+                                     type=int)
+
     parser_purchase.add_argument("-c", "--config", help="Set custom config file")
     parser_purchase.add_argument("-f", help="Don't prompt for user confirmation", dest="noconfirm", action="store_true")
     parser_purchase.add_argument("-e", "--email", help="email")
@@ -71,32 +103,34 @@ def add_parser_purchase(subparsers):
     parser_purchase.add_argument("-s", "--state", help="state")
     parser_purchase.add_argument("-cc", "--countrycode", help="country code")
     parser_purchase.add_argument("-z", "--zipcode", help="zipcode")
-    parser_purchase.add_argument("-rp", "--rootpw", help="root password")
-    parser_purchase.add_argument("-ns1", "--ns1", help="ns1")
-    parser_purchase.add_argument("-ns2", "--ns2", help="ns2")
-    parser_purchase.add_argument("--hostname", help="hostname")
+
+    if provider_type == 'vps':
+        parser_purchase.add_argument("-rp", "--rootpw", help="root password")
+        parser_purchase.add_argument("-ns1", "--ns1", help="ns1")
+        parser_purchase.add_argument("-ns2", "--ns2", help="ns2")
+        parser_purchase.add_argument("--hostname", help="hostname")
 
 
-def add_parser_status(subparsers):
-    parser_status = subparsers.add_parser("status", help="Get the status of the services.")
-    parser_status.add_argument("provider", help="The specified provider", nargs="?", choices=providers)
+def add_parser_status(subparsers, provider_type):
+    parser_status = subparsers.add_parser("status", help="Get the status of the %s services." % provider_type.upper())
+    parser_status.add_argument("provider", help="The specified provider", nargs="?", choices=providers[provider_type])
     parser_status.add_argument("-e", "--email", help="The login email address")
     parser_status.add_argument("-pw", "--password", help="The login password")
     parser_status.set_defaults(func=status)
 
 
-def add_parser_get_ip(subparsers):
+def add_parser_vps_get_ip(subparsers):
     parser_get_ip = subparsers.add_parser("getip", help="Get the IP address of the specified service.")
-    parser_get_ip.add_argument("provider", help="The specified provider", nargs="?", choices=providers)
+    parser_get_ip.add_argument("provider", help="The specified provider", nargs="?", choices=providers['vps'])
     parser_get_ip.add_argument("-n", "--number", help="The number of the service get the IP address for")
     parser_get_ip.add_argument("-e", "--email", help="The login email address")
     parser_get_ip.add_argument("-pw", "--password", help="The login password")
     parser_get_ip.set_defaults(func=get_ip)
 
 
-def add_parser_ssh(subparsers):
+def add_parser_vps_ssh(subparsers):
     parser_ssh = subparsers.add_parser("ssh", help="SSH into an active service.")
-    parser_ssh.add_argument("provider", help="The specified provider", nargs="?", choices=providers)
+    parser_ssh.add_argument("provider", help="The specified provider", nargs="?", choices=providers['vps'])
     parser_ssh.add_argument("-n", "--number", help="The number of the service to SSH into")
     parser_ssh.add_argument("-e", "--email", help="The login email address")
     parser_ssh.add_argument("-pw", "--password", help="The login password")
@@ -105,19 +139,21 @@ def add_parser_ssh(subparsers):
     parser_ssh.set_defaults(func=ssh)
 
 
-def add_parser_info(subparsers):
-    parser_info = subparsers.add_parser("info", help="Get information of the specified service.")
-    parser_info.add_argument("provider", help="The specified provider", nargs="?", choices=providers)
-    parser_info.add_argument("-n", "--number", help="The number of the service to change the password for")
+def add_parser_info(subparsers, provider_type):
+    parser_info = subparsers.add_parser("info",
+                                        help="Get information of the specified %s service." % provider_type.upper())
+    parser_info.add_argument("provider", help="The specified provider", nargs="?", choices=providers[provider_type])
+    parser_info.add_argument("-n", "--number",
+                             help="The number of the %s service to change the password for" % provider_type.upper())
     parser_info.add_argument("-e", "--email", help="The login email address")
     parser_info.add_argument("-pw", "--password", help="The login password")
     parser_info.set_defaults(func=info)
 
 
-def add_parser_setrootpw(subparsers):
+def add_parser_vps_setrootpw(subparsers):
     parser_setrootpw = subparsers.add_parser("setrootpw", help="Set the root password of the last activated service.")
-    parser_setrootpw.add_argument("provider", help="The specified provider", choices=providers)
-    parser_setrootpw.add_argument("-n", "--number", help="The number of the service to change the password for")
+    parser_setrootpw.add_argument("provider", help="The specified provider", choices=providers['vps'])
+    parser_setrootpw.add_argument("-n", "--number", help="The number of the VPS service to change the password for")
     parser_setrootpw.add_argument("-e", "--email", help="The login email address")
     parser_setrootpw.add_argument("-pw", "--password", help="The login password")
     parser_setrootpw.add_argument("-p", "--rootpw", help="The new root password", required=True)
@@ -164,7 +200,7 @@ def purchase(args):
     if not _check_provider(provider, user_settings):
         print("Missing option")
         sys.exit(2)
-    _purchase(provider, args.option, user_settings)
+    _purchase(provider, args.type, args.option, user_settings)
 
 
 def _check_provider(provider, config):
@@ -187,8 +223,15 @@ def _merge_arguments(config, args):
             config.put(key, args[key])
 
 
-def _purchase(p, vps_option, user_settings):
-    configurations = p.options()
+def _purchase(provider, provider_type, option, user_settings):
+    return {
+        'vps': lambda: _purchase_vps(provider, option, user_settings),
+        'vpn': lambda: _purchase_vpn(provider, option, user_settings)
+    }[provider_type]()
+
+
+def _purchase_vps(provider, vps_option, user_settings):
+    configurations = provider.options()
     if not 0 <= vps_option < len(configurations):
         print(('Specified configuration %s is not in range 0-%s' % (vps_option, len(configurations))))
         sys.exit(1)
@@ -209,9 +252,13 @@ def _purchase(p, vps_option, user_settings):
     else:
         choice = _confirmation("Purchase this option?", default="no")
     if choice:
-        _register(p, vps_option, user_settings)
+        _register(provider, vps_option, user_settings)
     else:
         return False
+
+
+def _purchase_vpn(provider, vpn_option, user_settings):  # TODO: Implement
+    raise NotImplementedError('Purchasing a VPN still has to be implemented')
 
 
 def _confirmation(message, default="y"):
@@ -235,9 +282,8 @@ def _confirmation(message, default="y"):
         print("Please respond with y[es] or n[o]")
 
 
-# noinspection PyUnusedLocal
-def list_providers(args=None):
-    _list_providers()
+def list_providers(args):
+    _list_providers(args.type)
 
 
 def _print_unknown_provider(provider):
@@ -247,10 +293,23 @@ def _print_unknown_provider(provider):
         print("Please specify a provider")
 
 
-def _list_providers():
+def _print_unknown_provider_type(provider_type):
+    if provider_type:
+        print(("Unknown provider type: %s\n" % provider_type))
+    else:
+        print("Please specify a provider type")
+
+
+def _list_providers(provider_type):
     print("Providers:")
-    for provider in providers:
-        print(("   {:15}{:30}".format(provider, providers[provider].website)))
+    for provider in providers[provider_type]:
+        print(("   {:15}{:30}".format(provider, providers[provider_type][provider].website)))
+
+
+def _list_provider_types():
+    print("Provider Types:")
+    for provider_type in types:
+        print(("   {:15}" % provider_type))
 
 
 def _options(p):
@@ -271,12 +330,18 @@ def _register(p, vps_option, user_settings):
 
 
 def _get_provider(args):
+    provider_type = args.type
     provider = args.provider
-    if not provider or provider not in providers:
-        _print_unknown_provider(provider)
-        _list_providers()
+    if not provider_type or provider_type not in providers:
+        _print_unknown_provider_type(provider_type)
+        _list_provider_types()
         sys.exit(2)
-    return providers[provider]
+
+    if not provider or provider not in providers[provider_type]:
+        _print_unknown_provider(provider)
+        _list_providers(provider_type)
+        sys.exit(2)
+    return providers[provider_type][provider]
 
 
 def ssh(args):
