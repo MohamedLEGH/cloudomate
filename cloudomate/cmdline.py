@@ -9,6 +9,7 @@ from cloudomate.hoster.vps.legionbox import LegionBox
 from cloudomate.hoster.vps.linevast import LineVast
 from cloudomate.hoster.vps.pulseservers import Pulseservers
 from cloudomate.hoster.vps.undergroundprivate import UndergroundPrivate
+from cloudomate.hoster.vpn.azirevpn import AzireVpn
 from cloudomate.util.config import UserOptions
 from cloudomate.wallet import Wallet
 
@@ -25,7 +26,7 @@ providers = {
         "underground": UndergroundPrivate(),
     },
     "vpn": {
-        # TODO: Add actual VPN Providers
+        "azirevpn": AzireVpn(),
     }
 }
 
@@ -49,6 +50,7 @@ def add_vpn_parsers(subparsers):
     vpn_subparsers.required = True
 
     add_parser_list(vpn_subparsers, "vpn")
+    add_parser_options(vpn_subparsers, "vpn")
     add_parser_purchase(vpn_subparsers, "vpn")
     add_parser_status(vpn_subparsers, "vpn")
     add_parser_info(vpn_subparsers, "vpn")
@@ -61,7 +63,7 @@ def add_vps_parsers(subparsers):
     vps_subparsers.required = True
 
     add_parser_list(vps_subparsers, "vps")
-    add_parser_vps_options(vps_subparsers)
+    add_parser_options(vps_subparsers, "vps")
     add_parser_purchase(vps_subparsers, "vps")
     add_parser_status(vps_subparsers, "vps")
     add_parser_vps_setrootpw(vps_subparsers)
@@ -75,9 +77,9 @@ def add_parser_list(subparsers, provider_type):
     parser_list.set_defaults(func=list_providers)
 
 
-def add_parser_vps_options(subparsers):
-    parser_options = subparsers.add_parser("options", help="List VPS provider configurations")
-    parser_options.add_argument("provider", help="The specified VPS provider", choices=providers['vps'])
+def add_parser_options(subparsers, provider_type):
+    parser_options = subparsers.add_parser("options", help="List %s provider configurations" % provider_type.upper())
+    parser_options.add_argument("provider", help="The specified %s provider" % provider_type.upper(), choices=providers[provider_type])
     parser_options.set_defaults(func=options)
 
 
@@ -200,7 +202,11 @@ def purchase(args):
     if not _check_provider(provider, user_settings):
         print("Missing option")
         sys.exit(2)
-    _purchase(provider, args.type, args.option, user_settings)
+
+    if args.type == 'vps':
+        _purchase_vps(provider, user_settings, args.option)
+    else:
+        _purchase_vpn(provider, user_settings)
 
 
 def _check_provider(provider, config):
@@ -223,14 +229,7 @@ def _merge_arguments(config, args):
             config.put(key, args[key])
 
 
-def _purchase(provider, provider_type, option, user_settings):
-    return {
-        'vps': lambda: _purchase_vps(provider, option, user_settings),
-        'vpn': lambda: _purchase_vpn(provider, option, user_settings)
-    }[provider_type]()
-
-
-def _purchase_vps(provider, vps_option, user_settings):
+def _purchase_vps(provider, user_settings, vps_option):
     configurations = provider.options()
     if not 0 <= vps_option < len(configurations):
         print(('Specified configuration %s is not in range 0-%s' % (vps_option, len(configurations))))
@@ -252,13 +251,24 @@ def _purchase_vps(provider, vps_option, user_settings):
     else:
         choice = _confirmation("Purchase this option?", default="no")
     if choice:
-        _register(provider, vps_option, user_settings)
+        _register_vps(provider, vps_option, user_settings)
     else:
         return False
 
 
-def _purchase_vpn(provider, vpn_option, user_settings):  # TODO: Implement
-    raise NotImplementedError('Purchasing a VPN still has to be implemented')
+def _purchase_vpn(provider, user_settings):
+    print("Selected configuration:")
+    provider.print_configurations()
+
+    if 'walletpath' in user_settings.config and user_settings.get("noconfirm") is True:
+        choice = True
+    else:
+        choice = _confirmation("Purchase this option?", default="no")
+
+    if choice:
+        _register_vpn(provider, user_settings)
+    else:
+        return False
 
 
 def _confirmation(message, default="y"):
@@ -318,7 +328,7 @@ def _options(p):
     p.print_configurations()
 
 
-def _register(p, vps_option, user_settings):
+def _register_vps(p, vps_option, user_settings):
     # For now use standard wallet implementation through Electrum
     # If wallet path is defined in config, use that.
     if 'walletpath' in user_settings.config:
@@ -327,6 +337,17 @@ def _register(p, vps_option, user_settings):
         wallet = Wallet()
 
     p.purchase(user_settings=user_settings, options=vps_option, wallet=wallet)
+
+
+def _register_vpn(p, user_settings):
+    # For now use standard wallet implementation through Electrum
+    # If wallet path is defined in config, use that.
+    if 'walletpath' in user_settings.config:
+        wallet = Wallet(wallet_path=user_settings.get('walletpath'))
+    else:
+        wallet = Wallet()
+
+    p.purchase(user_settings=user_settings, wallet=wallet)
 
 
 def _get_provider(args):

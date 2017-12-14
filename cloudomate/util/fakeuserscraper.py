@@ -3,7 +3,7 @@ from mechanicalsoup import StatefulBrowser
 
 class userScraper:
     """
-    Scrapes fakeadressgenerator.com for fake user data,
+    Scrapes fakeaddressgenerator.com for fake user data,
     """
 
     attributes = [
@@ -51,6 +51,7 @@ class userScraper:
             'Zip Code': 'zipcode',
             'Phone Number': 'phoneNumber',
             'Company': 'companyName',
+            'Username': 'username',
         }
 
         for attr in attrs.keys():

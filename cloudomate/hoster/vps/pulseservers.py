@@ -38,7 +38,7 @@ class Pulseservers(SolusvmHoster):
         Open browser to hoster website and return parsed options
         :return: parsed options
         """
-        self.br.open('https://pulseservers.com/vps-linux.html')  # Website is not fully secure (causing a crash), so ssl is not used
+        self.br.open('https://pulseservers.com/vps-linux.html')
         return self.parse_options(self.br.get_current_page())
 
     def parse_options(self, site):
