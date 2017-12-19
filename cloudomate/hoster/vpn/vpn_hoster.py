@@ -1,57 +1,49 @@
 from cloudomate.hoster.hoster import Hoster
-from collections import namedtuple
 from cloudomate import wallet as wallet_util
+from collections import namedtuple
 
 import sys
 
-
-VpnOptions = namedtuple('VpnOptions', ['name', 'protocol', 'price', 'bandwidth', 'speed'])
-VpnStatus = namedtuple('VpnStatus', ['online', 'expiration'])
-VpnInfo = namedtuple('VpnInfo', ['username', 'password', 'ovpn'])
+VpnConfiguration = namedtuple('VpnConfiguration', ['username', 'password', 'ovpn'])
+VpnOption = namedtuple('VpnOption', ['name', 'protocol', 'price', 'bandwidth', 'speed'])  # Price in USD
+VpnStatus = namedtuple('VpnStatus', ['online', 'expiration'])   # Online is a boolean, expiration an ISO datetime
 
 class VpnHoster(Hoster):
+    def get_configuration(self):
+        """Get Hoster configuration.
+
+        :return: Returns VpnConfiguration for the VPN Hoster instance
+        """
+        raise NotImplementedError('Abstract method implementation')
+
+    @classmethod
+    def get_options(cls):
+        """Get Hoster options.
+
+        :return: Returns list of VpnOption objects
+        """
+        raise NotImplementedError('Abstract method implementation')
+
+    def get_status(self):
+        """Get Hoster configuration.
+
+        :return: Returns VpnStatus of the VPN Hoster instance
+        """
+        raise NotImplementedError('Abstract method implementation')
+
+
     """
-    Abstract class for VPN Hosters, concrete classes should provide the information in the __init__ function.
+    Legacy methods
+    Still used by the commandline
+    Remove when possible
     """
 
-    def __init__(self):
-        super().__init__()
-
-        self.name = None
-        self.website = None
-        self.protocol = None
-        self.price = None
-        self.bandwidth = None
-        self.speed = None
-
-    def info(self, user_settings):
-        """
-        This function should display information on the VPN service such as
-        :return:
-        """
-        raise NotImplementedError('Abstract method implementation')
-
-    def purchase(self, user_settings, wallet):
-        """
-        This function should actually buy a vps server with the specified wallet and provided credentials.
-        """
-        raise NotImplementedError('Abstract method implementation')
-
-    def status(self, user_settings):
-        """
-        This function should provide the status of the last activated VPN subscription.
-        """
-        raise NotImplementedError('Abstract method implementation')
-
-    def get_status(self, user_settings):
+    def get_status(self):
         # Backward compatibility, apparently this method should print and not return the values
         row = "{:18}" * 2
-        status = self.status(user_settings)
+        status = self.get_status(self.settings)
         print(row.format("Online", "Expiration"))
         print(row.format(str(status.online), status.expiration.isoformat()))
-
-    def options(self):
-        return VpnOptions(self.name, self.protocol, self.price, self.bandwidth, self.speed)
 
     def print_options(self, options):
         bandwidth = "Unlimited" if options.bandwidth == sys.maxsize else options.bandwidth
@@ -70,5 +62,5 @@ class VpnHoster(Hoster):
 
     # For compatibility with the commandline code
     def print_configurations(self):
-        options = self.options()
+        options = self.get_options()
         self.print_options(options)

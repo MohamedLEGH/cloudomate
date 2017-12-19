@@ -28,7 +28,7 @@ class Hoster(object):
     def get_metadata():
         """Get metadata about the Hoster.
 
-        :return: Returns tuple of name an website url
+        :return: Returns tuple of name and website url
         """
         raise NotImplementedError('Abstract method implementation')
 
@@ -40,6 +40,14 @@ class Hoster(object):
         """
         raise NotImplementedError('Abstract method implementation')
 
+    @staticmethod
+    def get_required_settings():
+        """Get settings required by the Hoster.
+
+        :return: Returns dictionary with sections as keys and the required settings in those sections as values
+        """
+        raise NotImplementedError('Abstract method implementation')
+
     def get_status(self):
         """Get Hoster configuration.
 
@@ -48,7 +56,7 @@ class Hoster(object):
         raise NotImplementedError('Abstract method implementation')
 
     def purchase(self, wallet, option):
-        """Get Hoster configuration.
+        """Purchase Hoster.
         
         :param wallet: The Electrum wallet to use for payments
         :param option: Hoster option to purchase
