@@ -14,13 +14,12 @@ Cloudomate
 Overview
 ========
 
-Cloudomate is an unpermissioned open compute API which provides an automated way to buy VPS instances from multiple providers. The easiest way to use Cloudomate is via the command-line interface. 
+Cloudomate is an unpermissioned open compute API which provides an automated way to buy VPS instances and VPN servers from multiple providers. The easiest way to use Cloudomate is via the command-line interface. 
 
 Requirements
 ============
 
-* Python 2.7
-* python-lxml installed on the system
+* Python 3
 * Works on Linux, Mac OSX, BSD
 * An active Electrum_ wallet with sufficient funds
 
@@ -29,12 +28,13 @@ Installation
 
 The project can be installed through pip ::
 
-   apt-get install python-lxml
-   pip install cloudomate
+   pip3 install cloudomate
 
 
 Providers
 =========
+VPS
+---------
 
 Currently the following VPS providers are implemented: ::
 
@@ -48,7 +48,18 @@ Currently the following VPS providers are implemented: ::
 
 This same list can be accessed through the list command. ::
 
-   cloudomate list
+   cloudomate vps list
+
+VPN
+---------
+
+Currently the following VPN providers are implemented: ::
+
+   azirevpn       https://www.azirevpn.com
+
+This same list can be accessed through the list command. ::
+
+   cloudomate vpn list
 
 
 Configuration
@@ -92,19 +103,54 @@ Basic usage
 
 ::
 
-   usage: cloudomate [-h] {list,options,purchase,status,setrootpw,getip} ...
+   usage: cloudomate [-h] {vps,vpn} ...
 
    Cloudomate
 
    positional arguments:
-     {list,options,purchase,status,setrootpw,getip}
-       list                List providers
-       options             List provider configurations
-       purchase            Purchase VPS
-       status              Get the status of the services.
-       setrootpw           Set the root password of the last activated service.
-       getip               Get the ip of the specified service.
+     {vps,vpn}
+       
+   optional arguments:
+     -h, --help            show this help message and exit
+     
+VPS
+~~~~~~~~~~~
 
+::
+
+   usage: cloudomate vps [-h] 
+                         {list,options,purchase,status,setrootpw,getip,ssh,info}
+                         ...
+
+   positional arguments:
+     {list,options,purchase,status,setrootpw,getip,ssh,info}
+       list                List VPS providers
+       options             List VPS provider configurations
+       purchase            Purchase VPS
+       status              Get the status of the VPS services.
+       setrootpw           Set the root password of the last activated service.
+       getip               Get the IP address of the specified service.
+       ssh                 SSH into an active service.
+       info                Get information of the specified VPS service.
+       
+   optional arguments:
+     -h, --help            show this help message and exit
+
+VPN
+~~~~~~~~~~~
+
+::
+
+   usage: cloudomate [-h] {vps,vpn} ...
+
+   positional arguments:
+     {list,options,purchase,status,setrootpw,getip,ssh,info}
+       list                List VPN providers
+       options             List VPN provider configurations
+       purchase            Purchase VPN
+       status              Get the status of the VPN services.
+       info                Get information of the specified VPN service.
+       
    optional arguments:
      -h, --help            show this help message and exit
 
@@ -115,7 +161,7 @@ options
 List the options for Linevast_ ::
     
     
-   $ cloudomate options linevast
+   $ cloudomate vps options linevast
 
 ::
     
@@ -138,7 +184,7 @@ Purchase
 Use the purchase command to purchase a VPS instance. An account is created
 and the instance is paid through an Electrum wallet. ::
    
-   $ cloudomate purchase linevast 0
+   $ cloudomate vps purchase linevast 0
   
 ::
 
