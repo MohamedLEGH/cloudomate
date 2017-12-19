@@ -181,7 +181,13 @@ def info(args):
     provider = _get_provider(args)
     user_settings = _get_user_settings(args, provider.name)
     print(("Info for " + provider.name))
-    _print_info_dict(provider.info(user_settings))
+
+    info = provider.info(user_settings)
+
+    if args.type == "vps":
+        _print_info_vps(info)
+    elif args.type == "vpn":
+        _print_info_vpn(info)
 
 
 def status(args):
@@ -389,11 +395,26 @@ def ssh(args):
         print('Install sshpass to use this command')
 
 
-def _print_info_dict(info_dict):
+def _print_info_vps(info_dict):
     row_format = "{:<25}{:<30}"
     for key in info_dict:
         print((row_format.format(key, info_dict[key])))
 
+def _print_info_vpn(info):
+    credentials = "credentials.conf"
+    header = "=" * 20
+
+    ovpn = info.ovpn
+    ovpn += "\nauth-user-pass " + credentials
+
+    print("\ncredentials.conf")
+    print(header)
+    print(info.username)
+    print(info.password)
+    print("\nsettings.ovpn")
+    print(header)
+    print(ovpn)
+    print(header)
 
 if __name__ == '__main__':
     execute()
