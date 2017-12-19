@@ -3,26 +3,25 @@ import sys
 from argparse import ArgumentParser
 
 from cloudomate.util.config import UserOptions
+from cloudomate.util.fakeuserscraper import UserScraper
 from cloudomate.vps.blueangelhost import BlueAngelHost
 from cloudomate.vps.ccihosting import CCIHosting
 from cloudomate.vps.crowncloud import CrownCloud
 from cloudomate.vps.legionbox import LegionBox
 from cloudomate.vps.linevast import LineVast
 from cloudomate.vps.pulseservers import Pulseservers
-from cloudomate.vps.rockhoster import RockHoster
 from cloudomate.vps.undergroundprivate import UndergroundPrivate
 from cloudomate.wallet import Wallet
 
 commands = ["options", "purchase", "list"]
 providers = {
-    "rockhoster": RockHoster(),
-    'pulseservers': Pulseservers(),
-    "crowncloud": CrownCloud(),
     "blueangelhost": BlueAngelHost(),
     "ccihosting": CCIHosting(),
-    "linevast": LineVast(),
-    "underground": UndergroundPrivate(),
+    "crowncloud": CrownCloud(),
     "legionbox": LegionBox(),
+    "linevast": LineVast(),
+    'pulseservers': Pulseservers(),
+    "underground": UndergroundPrivate(),
 }
 
 
@@ -38,6 +37,7 @@ def execute(cmd=sys.argv[1:]):
     add_parser_get_ip(subparsers)
     add_parser_ssh(subparsers)
     add_parser_info(subparsers)
+    subparsers.required = True
 
     args = parser.parse_args(cmd)
     args.func(args)
@@ -76,6 +76,7 @@ def add_parser_purchase(subparsers):
     parser_purchase.add_argument("-ns1", "--ns1", help="ns1")
     parser_purchase.add_argument("-ns2", "--ns2", help="ns2")
     parser_purchase.add_argument("--hostname", help="hostname")
+    parser_purchase.add_argument("--randomuser", action="store_true", help="Use random user info")
 
 
 def add_parser_status(subparsers):
@@ -141,13 +142,13 @@ def get_ip(args):
 def info(args):
     provider = _get_provider(args)
     user_settings = _get_user_settings(args, provider.name)
-    print("Info for " + provider.name)
+    print(("Info for " + provider.name))
     _print_info_dict(provider.info(user_settings))
 
 
 def status(args):
     provider = _get_provider(args)
-    print("Getting status for %s." % provider.name)
+    print(("Getting status for %s." % provider.name))
     user_settings = _get_user_settings(args, provider.name)
     provider.get_status(user_settings)
 
@@ -162,6 +163,10 @@ def purchase(args):
         sys.exit(2)
     provider = _get_provider(args)
     user_settings = _get_user_settings(args, provider.name)
+
+    if args.randomuser:
+        _merge_random_user_data(user_settings)
+
     if not _check_provider(provider, user_settings):
         print("Missing option")
         sys.exit(2)
@@ -171,6 +176,11 @@ def purchase(args):
 def _check_provider(provider, config):
     return config.verify_options(provider.required_settings)
 
+def _merge_random_user_data(user_settings):
+    usergenerator = UserScraper()
+    randomuser = usergenerator.get_user()
+    for key in randomuser.keys():
+        user_settings.config[key] = randomuser[key]
 
 def _get_user_settings(args, provider=None):
     user_settings = UserOptions()
@@ -191,20 +201,21 @@ def _merge_arguments(config, args):
 def _purchase(p, vps_option, user_settings):
     configurations = p.options()
     if not 0 <= vps_option < len(configurations):
-        print('Specified configuration %s is not in range 0-%s' % (vps_option, len(configurations)))
+        print(('Specified configuration %s is not in range 0-%s' % (vps_option, len(configurations))))
         sys.exit(1)
     vps_option = configurations[vps_option]
     row_format = "{:15}" * 6
     print("Selected configuration:")
-    print(row_format.format("Name", "CPU", "RAM", "Storage", "Bandwidth", "Est.Price"))
-    print(row_format.format(
+    print((row_format.format("Name", "CPU", "RAM", "Storage", "Bandwidth", "Est.Price")))
+    print((row_format.format(
         vps_option.name,
         str(vps_option.cpu),
         str(vps_option.ram),
         str(vps_option.storage),
         str(vps_option.bandwidth),
-        str(vps_option.price)))
-    if user_settings.get("noconfirm") is not None and user_settings.get("noconfirm") is True:
+        str(vps_option.price))))
+
+    if 'walletpath' in user_settings.config and user_settings.get("noconfirm") is True:
         choice = True
     else:
         choice = _confirmation("Purchase this option?", default="no")
@@ -225,7 +236,7 @@ def _confirmation(message, default="y"):
 
     while True:
         try:
-            choice = raw_input("%s (%s) " % (message, prompt)).lower()
+            choice = input("%s (%s) " % (message, prompt)).lower()
         except EOFError:
             sys.exit(2)
         if default is not None and choice == '':
@@ -242,7 +253,7 @@ def list_providers(args=None):
 
 def _print_unknown_provider(provider):
     if provider:
-        print("Unknown provider: %s\n" % provider)
+        print(("Unknown provider: %s\n" % provider))
     else:
         print("Please specify a provider")
 
@@ -250,18 +261,23 @@ def _print_unknown_provider(provider):
 def _list_providers():
     print("Providers:")
     for provider in providers:
-        print("   {:15}{:30}".format(provider, providers[provider].website))
+        print(("   {:15}{:30}".format(provider, providers[provider].website)))
 
 
 def _options(p):
-    print("Options for %s:\n" % p.name)
+    print(("Options for %s:\n" % p.name))
     p.options()
     p.print_configurations()
 
 
 def _register(p, vps_option, user_settings):
     # For now use standard wallet implementation through Electrum
-    wallet = Wallet()
+    # If wallet path is defined in config, use that.
+    if 'walletpath' in user_settings.config:
+        wallet = Wallet(wallet_path=user_settings.get('walletpath'))
+    else:
+        wallet = Wallet()
+
     p.purchase(user_settings=user_settings, vps_option=vps_option, wallet=wallet)
 
 
@@ -282,7 +298,7 @@ def ssh(args):
     try:
         subprocess.call(['sshpass', '-p', user_settings.get('rootpw'), 'ssh', '-o', 'StrictHostKeyChecking=no',
                          user + '@' + ip])
-    except OSError, e:
+    except OSError as e:
         print(e)
         print('Install sshpass to use this command')
 
@@ -290,7 +306,7 @@ def ssh(args):
 def _print_info_dict(info_dict):
     row_format = "{:<25}{:<30}"
     for key in info_dict:
-        print(row_format.format(key, info_dict[key]))
+        print((row_format.format(key, info_dict[key])))
 
 
 if __name__ == '__main__':
