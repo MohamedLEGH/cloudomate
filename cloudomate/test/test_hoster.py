@@ -61,8 +61,8 @@ class TestHosterAbstract(unittest.TestCase):
     def test_create_browser(self):
         hoster = cloudomate.hoster.vps.hoster.Hoster()
         browser = hoster._create_browser()
-        for header in browser.addheaders:
-            if 'Mozilla/5.0' in header[1]:
+        for header in browser.session.headers:
+            if 'Mozilla/5.0' in browser.session.headers[header]:
                 return True
         self.fail('No User-agent set in browser')
 
