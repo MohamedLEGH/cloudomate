@@ -13,21 +13,22 @@ from cloudomate.hoster.vpn.azirevpn import AzireVpn
 from cloudomate.util.config import UserOptions
 from cloudomate.util.fakeuserscraper import UserScraper
 from cloudomate.wallet import Wallet
+from cloudomate import wallet as wallet_util
 
 commands = ["options", "purchase", "list"]
 types = ["vps", "vpn"]
 providers = {
     "vps": {
-        "blueangelhost": BlueAngelHost(),
-        "ccihosting": CCIHosting(),
-        "crowncloud": CrownCloud(),
-        "legionbox": LegionBox(),
-        "linevast": LineVast(),
-        'pulseservers': Pulseservers(),
-        "underground": UndergroundPrivate(),
+        "blueangelhost": BlueAngelHost,
+        "ccihosting": CCIHosting,
+        "crowncloud": CrownCloud,
+        "legionbox": LegionBox,
+        "linevast": LineVast,
+        'pulseservers': Pulseservers,
+        "underground": UndergroundPrivate,
     },
     "vpn": {
-        "azirevpn": AzireVpn(),
+        "azirevpn": AzireVpn,
     }
 }
 
@@ -179,34 +180,50 @@ def get_ip(args):
 
 def info(args):
     provider = _get_provider(args)
-    user_settings = _get_user_settings(args, provider.name)
-    print(("Info for " + provider.name))
+    name, _ = provider.get_metadata()
+    user_settings = _get_user_settings(args, name)
+    print(("Info for " + name))
 
-    info = provider.info(user_settings)
+    p = provider(user_settings)
+    c = p.get_configuration()
 
     if args.type == "vps":
-        _print_info_vps(info)
+        _print_info_vps(c)
     elif args.type == "vpn":
-        _print_info_vpn(info)
+        _print_info_vpn(c)
 
 
 def status(args):
     provider = _get_provider(args)
-    print(("Getting status for %s." % provider.name))
-    user_settings = _get_user_settings(args, provider.name)
-    provider.get_status(user_settings)
+    name, _ = provider.get_metadata()
+    print(("Getting status for %s." % name))
+    user_settings = _get_user_settings(args, name)
+    p = provider(user_settings)
+    s = p.get_status()
+
+    if args.type == "vps":
+        raise NotImplementedError('Printing VPS status must still be implemented')
+    elif args.type == "vpn":
+        row = "{:18}" * 2
+        print(row.format("Online", "Expiration"))
+        print(row.format(str(s.online), s.expiration.isoformat()))
 
 
 def options(args):
     provider = _get_provider(args)
-    _options(provider)
+
+    if args.type == "vps":
+        _options_vps(provider)
+    elif args.type == "vpn":
+        _options_vpn(provider)
 
 
 def purchase(args):
     if "provider" not in vars(args):
         sys.exit(2)
     provider = _get_provider(args)
-    user_settings = _get_user_settings(args, provider.name)
+    name, _ = provider.get_metadata()
+    user_settings = _get_user_settings(args, name)
 
     if args.randomuser:
         _merge_random_user_data(user_settings)
@@ -222,7 +239,7 @@ def purchase(args):
 
 
 def _check_provider(provider, config):
-    return config.verify_options(provider.required_settings)
+    return config.verify_options(provider.get_required_settings())
 
 def _merge_random_user_data(user_settings):
     usergenerator = UserScraper()
@@ -275,7 +292,8 @@ def _purchase_vps(provider, user_settings, vps_option):
 
 def _purchase_vpn(provider, user_settings):
     print("Selected configuration:")
-    provider.print_configurations()
+    options = provider.get_options()
+    _print_option_vpn(provider, options[0])
 
     if 'walletpath' in user_settings.config and user_settings.get("noconfirm") is True:
         choice = True
@@ -283,7 +301,7 @@ def _purchase_vpn(provider, user_settings):
         choice = _confirmation("Purchase this option?", default="no")
 
     if choice:
-        _register_vpn(provider, user_settings)
+        _register_vpn(provider, user_settings, options[0])
     else:
         return False
 
@@ -329,8 +347,9 @@ def _print_unknown_provider_type(provider_type):
 
 def _list_providers(provider_type):
     print("Providers:")
-    for provider in providers[provider_type]:
-        print(("   {:15}{:30}".format(provider, providers[provider_type][provider].website)))
+    for provider in providers[provider_type].values():
+        name, website = provider.get_metadata()
+        print("   {:15}{:30}".format(name, website))
 
 
 def _list_provider_types():
@@ -339,10 +358,20 @@ def _list_provider_types():
         print(("   {:15}" % provider_type))
 
 
-def _options(p):
-    print(("Options for %s:\n" % p.name))
-    p.options()
+def _options_vps(p):
+    name, _ = p.get_metadata()
+    print(("Options for %s:\n" % name))
+    p.get_options()
     p.print_configurations()
+
+
+def _options_vpn(provider):
+    name, _ = provider.get_metadata()
+    print(("Options for %s:\n" % name))
+    options = provider.get_options()
+
+    for option in options:
+        _print_option_vpn(provider, option)
 
 
 def _register_vps(p, vps_option, user_settings):
@@ -356,7 +385,7 @@ def _register_vps(p, vps_option, user_settings):
     p.purchase(user_settings=user_settings, options=vps_option, wallet=wallet)
 
 
-def _register_vpn(p, user_settings):
+def _register_vpn(p, user_settings, option):
     # For now use standard wallet implementation through Electrum
     # If wallet path is defined in config, use that.
     if 'walletpath' in user_settings.config:
@@ -364,7 +393,8 @@ def _register_vpn(p, user_settings):
     else:
         wallet = Wallet()
 
-    p.purchase(user_settings=user_settings, wallet=wallet)
+    provider = p(user_settings)
+    provider.purchase(wallet, option)
 
 
 def _get_provider(args):
@@ -415,6 +445,22 @@ def _print_info_vpn(info):
     print(header)
     print(ovpn)
     print(header)
+
+def _print_option_vpn(provider, option):
+    bandwidth = "Unlimited" if option.bandwidth == sys.maxsize else option.bandwidth
+    speed = "Unlimited" if option.speed == sys.maxsize else option.speed
+
+    # Calculate the estimated price
+    rate = wallet_util.get_rate("USD")
+    fee = wallet_util.get_network_fee()
+    gateway = provider.get_gateway()
+    estimate = gateway.estimate_price(option.price * rate) + fee  # BTC
+    estimate = round(1000 * estimate, 2)  # mBTC
+
+    # Print everything
+    row = "{:18}" * 6
+    print(row.format("Name", "Protocol", "Bandwidth", "Speed", "Est. Price (mBTC)", "Price (USD)"))
+    print(row.format(option.name, option.protocol, bandwidth, speed, str(estimate), str(option.price)))
 
 if __name__ == '__main__':
     execute()

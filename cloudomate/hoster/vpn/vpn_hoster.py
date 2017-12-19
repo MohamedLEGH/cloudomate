@@ -1,5 +1,4 @@
 from cloudomate.hoster.hoster import Hoster
-from cloudomate import wallet as wallet_util
 from collections import namedtuple
 
 import sys
@@ -30,37 +29,3 @@ class VpnHoster(Hoster):
         :return: Returns VpnStatus of the VPN Hoster instance
         """
         raise NotImplementedError('Abstract method implementation')
-
-
-    """
-    Legacy methods
-    Still used by the commandline
-    Remove when possible
-    """
-
-    def get_status(self):
-        # Backward compatibility, apparently this method should print and not return the values
-        row = "{:18}" * 2
-        status = self.get_status(self.settings)
-        print(row.format("Online", "Expiration"))
-        print(row.format(str(status.online), status.expiration.isoformat()))
-
-    def print_options(self, options):
-        bandwidth = "Unlimited" if options.bandwidth == sys.maxsize else options.bandwidth
-        speed = "Unlimited" if options.speed == sys.maxsize else options.speed
-
-        # Calculate the estimated price
-        rate = wallet_util.get_rate("USD")
-        fee = wallet_util.get_network_fee()
-        estimate = self.gateway.estimate_price(options.price * rate) + fee  # BTC
-        estimate = round(1000 * estimate, 2)  # mBTC
-
-        # Print everything
-        row = "{:18}" * 6
-        print(row.format("Name", "Protocol", "Bandwidth", "Speed", "Est. Price (mBTC)", "Price (USD)"))
-        print(row.format(options.name, options.protocol, bandwidth, speed, str(estimate), str(options.price)))
-
-    # For compatibility with the commandline code
-    def print_configurations(self):
-        options = self.get_options()
-        self.print_options(options)

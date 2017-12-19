@@ -37,6 +37,7 @@ class UserOptions(object):
             self.config[key] = value
 
     def verify_options(self, options):
+        return True
         valid = True
         for option in options:
             if option not in self.config or not self.config.get(option):

@@ -4,10 +4,8 @@ from mechanicalsoup import StatefulBrowser
 
 class Hoster(object):
     def __init__(self, settings):
+        self._browser = self._create_browser()
         self._settings = settings
-
-        user_agent = UserAgent()
-        self._browser = StatefulBrowser(user_agent=user_agent.random)
 
     def get_configuration(self):
         """Get Hoster configuration.
@@ -62,3 +60,8 @@ class Hoster(object):
         :param option: Hoster option to purchase
         """
         raise NotImplementedError('Abstract method implementation')
+
+    @staticmethod
+    def _create_browser():
+        user_agent = UserAgent()
+        return StatefulBrowser(user_agent=user_agent.random)
