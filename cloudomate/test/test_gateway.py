@@ -39,14 +39,14 @@ class TestBitPay(unittest.TestCase):
             html_file = open(os.path.join(os.path.dirname(__file__), 'resources/bitpay_invoice_data.json'), 'r')
             data = html_file.read()
             with patch.object(json, 'loads', return_value=json.loads(data)):
-                cls.amount, cls.address = bitpay.extract_info('https://bitpay.com/invoice?id=4JGT4867vAMLaXUCeezJbG')
+                cls.amount, cls.address = bitpay.extract_info('https://bitpay.com/invoice?id=AQQ9j9xqAe9pXEhQMYhdeu')
 
     def test_address(self):
         self.assertEqual(self.address, '1C3sb2urF4UZVgEAVcUvHaNyDQjCCQmai3')
         pass
 
     def test_amount(self):
-        self.assertEqual(self.amount, 0.010511)
+        self.assertEqual(self.amount,0.010511)
 
     def test_address_valid(self):
         self.assertTrue(validate(self.address))
