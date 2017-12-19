@@ -1,75 +1,56 @@
-"""
-Hoster provides abstract implementations for common functionality
-At this time there is no abstract implementation for any functionality.
-"""
-import os
-import random
-import webbrowser
-from tempfile import mkstemp
-from urllib.parse import urlparse
-
+from fake_useragent import UserAgent
 from mechanicalsoup import StatefulBrowser
 
 
 class Hoster(object):
-    user_agents = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.1 Safari/603.1.30",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.81 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko",
-        "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
-        "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:53.0) Gecko/20100101 Firefox/53.0",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.81 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:52.0) Gecko/20100101 Firefox/52.0",
-        "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:53.0) Gecko/20100101 Firefox/53.0",
-    ]
+    def __init__(self, settings):
+        self._settings = settings
 
-    name = None
-    website = None
-    gateway = None
+        user_agent = UserAgent()
+        self._browser = StatefulBrowser(user_agent=user_agent.random)
 
-    def __init__(self):
+    def get_configuration(self):
+        """Get Hoster configuration.
+
+        :return: Returns configuration for the Hoster instance
         """
-        Initialize hoster object common variables
-         configurations holds the vps options available
-         br holds the stateful mechanize browser
-        """
-        self.br = self._create_browser()
-
-    def options(self):
         raise NotImplementedError('Abstract method implementation')
 
-    def purchase(self, *args, **kwargs):
+    @staticmethod
+    def get_gateway():
+        """Get payment gateway used by the Hoster.
+
+        :return: Returns the payment gateway module
+        """
+        raise NotImplementedError('Abstract method implementation')
+
+    @staticmethod
+    def get_metadata():
+        """Get metadata about the Hoster.
+
+        :return: Returns tuple of name an website url
+        """
         raise NotImplementedError('Abstract method implementation')
 
     @classmethod
-    def _create_browser(cls):
-        return StatefulBrowser(user_agent=random.choice(cls.user_agents))
+    def get_options(cls):
+        """Get Hoster options.
 
-    @staticmethod
-    def _open_in_browser(page):
-        html = page.get_data()
-        url = urlparse(page.geturl())
-        html = html.replace('href="/', 'href="' + url.scheme + '://' + url.netloc + '/')
-        html = html.replace('src="/', 'href="' + url.scheme + '://' + url.netloc + '/')
-        fd, path = mkstemp()
+        :return: Returns list of Hoster options
+        """
+        raise NotImplementedError('Abstract method implementation')
 
-        with open(path, 'w') as f:
-            f.write(html)
+    def get_status(self):
+        """Get Hoster configuration.
 
-        os.close(fd)
+        :return: Returns status of the Hoster instance
+        """
+        raise NotImplementedError('Abstract method implementation')
 
-        webbrowser.open(path)
+    def purchase(self, wallet, option):
+        """Get Hoster configuration.
+        
+        :param wallet: The Electrum wallet to use for payments
+        :param option: Hoster option to purchase
+        """
+        raise NotImplementedError('Abstract method implementation')
