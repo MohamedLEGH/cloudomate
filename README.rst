@@ -144,7 +144,7 @@ VPN
    usage: cloudomate [-h] {vps,vpn} ...
 
    positional arguments:
-     {list,options,purchase,status,setrootpw,getip,ssh,info}
+     {list,options,purchase,status,info}
        list                List VPN providers
        options             List VPN provider configurations
        purchase            Purchase VPN
