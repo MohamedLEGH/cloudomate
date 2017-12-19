@@ -1,15 +1,20 @@
 from cloudomate.hoster.vpn.vpn_hoster import VpnHoster
 from cloudomate.hoster.vpn.vpn_hoster import VpnStatus
+from cloudomate.hoster.vpn.vpn_hoster import VpnInfo
 from cloudomate.gateway import bitpay
 from cloudomate import wallet as wallet_util
 from forex_python.converter import CurrencyRates
 import sys
 import datetime
+import requests
+
 
 class AzireVpn(VpnHoster):
     REGISTER_URL = "https://manager.azirevpn.com/en/auth/register"
+    INFO_URL = "https://www.azirevpn.com/support/configuration/generate?os=others&country=se1&nat=0&keys=0&protocol=udp&tls=gcm&port=random"
     LOGIN_URL = "https://manager.azirevpn.com/auth/login"
     ORDER_URL = "https://manager.azirevpn.com/order"
+    OPTIONS_URL = "https://www.azirevpn.com"
     DASHBOARD_URL = "https://manager.azirevpn.com"
 
     required_settings = [
@@ -29,7 +34,7 @@ class AzireVpn(VpnHoster):
         self.gateway = bitpay
 
     def options(self):
-        self.br.open("https://www.azirevpn.com")
+        self.br.open(self.OPTIONS_URL)
         soup = self.br.get_current_page()
         strong = soup.select_one("div.prices > ul > li:nth-of-type(2) > ul > li:nth-of-type(1) strong")
         string = strong.get_text()
@@ -58,6 +63,11 @@ class AzireVpn(VpnHoster):
         print('Done purchasing')
         return transaction_hash
 
+    def info(self, user_settings):
+        response = requests.get(self.INFO_URL)
+        ovpn = response.text
+        return VpnInfo(user_settings.get("username"), user_settings.get("password"), ovpn)
+
     def status(self, user_settings):
         self._login(user_settings)
 
@@ -78,7 +88,6 @@ class AzireVpn(VpnHoster):
             online = True
         return VpnStatus(online, expiration)
 
-
     def _register(self, user_settings):
         self.br.open(self.REGISTER_URL)
         form = self.br.select_form()
@@ -92,7 +101,6 @@ class AzireVpn(VpnHoster):
             # An error occurred
             soup = self.br.get_current_page()
             ul = soup.select_one("ul.alert-danger")
-            #ul = page.select_one("ul.alert-danger")
             print(ul.get_text())
             sys.exit(2)
 
@@ -107,7 +115,8 @@ class AzireVpn(VpnHoster):
 
         if page.url == self.LOGIN_URL:
             # An error occurred
-            ul = page.select_one("ul.alert-danger")
+            soup = self.br.get_current_page()
+            ul = soup.select_one("ul.alert-danger")
             print(ul.get_text())
             sys.exit(2)
 
