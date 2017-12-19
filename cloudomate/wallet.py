@@ -200,10 +200,10 @@ class ElectrumWalletHandler(object):
         :return: transaction details
         """
         if fee is None:
-            transaction = subprocess.check_output(self.command + ['payto', str(address), str(amount)])
+            transaction = subprocess.check_output(self.command + ['payto', str(address), str(amount)]).decode()
         else:
-            transaction = subprocess.check_output(self.command + ['payto', str(address), str(amount), '-f', str(fee)])
-        jtrs = json.loads(str(transaction))
+            transaction = subprocess.check_output(self.command + ['payto', str(address), str(amount), '-f', str(fee)]).decode()
+        jtrs = json.loads(transaction)
         return jtrs['hex']
 
     def broadcast(self, transaction):
@@ -212,8 +212,8 @@ class ElectrumWalletHandler(object):
         :param transaction: hex of transaction
         :return: if successful returns success and
         """
-        broadcast = subprocess.check_output(self.command + ['broadcast', transaction])
-        jbr = json.loads(str(broadcast))
+        broadcast = subprocess.check_output(self.command + ['broadcast', transaction]).decode()
+        jbr = json.loads(broadcast)
         return tuple(jbr)
 
     def get_balance(self):
@@ -221,7 +221,7 @@ class ElectrumWalletHandler(object):
         Return the balance of the default electrum wallet
         :return: balance of default wallet
         """
-        output = str(subprocess.check_output(self.command + ['getbalance']))
+        output = subprocess.check_output(self.command + ['getbalance']).decode()
         balance_dict = json.loads(output)
         return balance_dict
 
@@ -230,6 +230,6 @@ class ElectrumWalletHandler(object):
         Return the list of addresses of default wallet
         :return: 
         """
-        address = str(subprocess.check_output(self.command + ['listaddresses']))
+        address = subprocess.check_output(self.command + ['listaddresses']).decode()
         addr = json.loads(address)
         return addr
