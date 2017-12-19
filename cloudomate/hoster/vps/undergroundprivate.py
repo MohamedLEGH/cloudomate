@@ -32,44 +32,44 @@ class UndergroundPrivate(SolusvmHoster):
         super(UndergroundPrivate, self).__init__()
 
     def get_status(self, user_settings):
-        clientarea = ClientArea(self.browser, self.clientarea_url, user_settings)
+        clientarea = ClientArea(self._browser, self.clientarea_url, user_settings)
         return clientarea.print_services()
 
     def set_rootpw(self, user_settings):
-        clientarea = ClientArea(self.browser, self.clientarea_url, user_settings)
+        clientarea = ClientArea(self._browser, self.clientarea_url, user_settings)
         clientarea.set_rootpw_client_data()
 
     def get_ip(self, user_settings):
-        clientarea = ClientArea(self.browser, self.clientarea_url, user_settings)
+        clientarea = ClientArea(self._browser, self.clientarea_url, user_settings)
         return clientarea.get_client_data_ip(self.client_data_url)
 
     def info(self, user_settings):
-        clientarea = ClientArea(self.browser, self.clientarea_url, user_settings)
+        clientarea = ClientArea(self._browser, self.clientarea_url, user_settings)
         return clientarea.get_client_data_info_dict(self.client_data_url)
 
     def register(self, user_settings, vps_option):
-        page = self.browser.open(vps_option.purchase_url)
+        page = self._browser.open(vps_option.purchase_url)
         if 'add' in page.url:
             print('Out of Stock')
             sys.exit(2)
         self.server_form(user_settings)
 
-        self.browser.open('https://www.clientlogin.sx/cart.php?a=view')
-        self.select_form_id(self.browser, 'frmCheckout')
-        form = self.browser.get_current_form()
+        self._browser.open('https://www.clientlogin.sx/cart.php?a=view')
+        self.select_form_id(self._browser, 'frmCheckout')
+        form = self._browser.get_current_form()
 
-        soup = self.browser.get_current_page()
+        soup = self._browser.get_current_page()
         submit = soup.select('button#btnCompleteOrder')[0]
         form.choose_submit(submit)
 
         #promobutton = form.find_control(name="validatepromo")
         #promobutton.disabled = True
-        self.user_form(self.browser, user_settings, 'blockchainv2', errorbox_class='errorbox', acceptos=False)
+        self.user_form(self._browser, user_settings, 'blockchainv2', errorbox_class='errorbox', acceptos=False)
         #html = self.br.response()
         #btcsoup = BeautifulSoup(html, 'lxml')
-        btcsoup = self.browser.get_current_page()
+        btcsoup = self._browser.get_current_page()
         url = btcsoup.find('iframe')['src']
-        page = self.browser.open(url)
+        page = self._browser.open(url)
         soup = BeautifulSoup(page.text, 'lxml')
         info = soup.findAll('input')
         amount = info[0]['value']
@@ -82,8 +82,8 @@ class UndergroundPrivate(SolusvmHoster):
         :param user_settings: settings
         :return: 
         """
-        self.select_form_id(self.browser, 'orderfrm')
-        form = self.browser.get_current_form()
+        self.select_form_id(self._browser, 'orderfrm')
+        form = self._browser.get_current_form()
         self.fill_in_server_form(form, user_settings)
         form['configoption[7]'] = '866'  # Ubuntu
 
@@ -92,10 +92,10 @@ class UndergroundPrivate(SolusvmHoster):
         form.new_control('hidden', 'a', 'confproduct')
         form.new_control('hidden', 'ajax', '1')
         
-        self.browser.submit_selected()
+        self._browser.submit_selected()
 
     def start(self):
-        russia_page = self.browser.open('https://undergroundprivate.com/russiaoffshorevps.html')
+        russia_page = self._browser.open('https://undergroundprivate.com/russiaoffshorevps.html')
         options = list(self.parse_r_options(russia_page))
         # france_page = self.br.open('https://undergroundprivate.com/franceoffshore.html')
         # options = itertools.chain(options, self.parse_f_options(france_page))

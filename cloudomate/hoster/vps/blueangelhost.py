@@ -39,20 +39,20 @@ class BlueAngelHost(SolusvmHoster):
         :param vps_option: 
         :return: 
         """
-        self.browser.open(vps_option.purchase_url)
+        self._browser.open(vps_option.purchase_url)
         self.server_form(user_settings)
-        self.browser.open('https://www.billing.blueangelhost.com/cart.php?a=view')
+        self._browser.open('https://www.billing.blueangelhost.com/cart.php?a=view')
 
-        summary = self.browser.get_current_page().find('div', class_='summary-container')
-        self.browser.follow_link(summary.find('a', class_='btn-checkout'))
+        summary = self._browser.get_current_page().find('div', class_='summary-container')
+        self._browser.follow_link(summary.find('a', class_='btn-checkout'))
 
-        self.browser.select_form(selector='form[name=orderfrm]')
-        self.browser.get_current_form()['customfield[4]'] = 'Google'
-        self.user_form(self.browser, user_settings, self.gateway.name)
+        self._browser.select_form(selector='form[name=orderfrm]')
+        self._browser.get_current_form()['customfield[4]'] = 'Google'
+        self.user_form(self._browser, user_settings, self.gateway.name)
 
-        self.browser.select_form(nr=0)
-        self.browser.submit_selected()
-        return self.gateway.extract_info(self.browser.get_url())
+        self._browser.select_form(nr=0)
+        self._browser.submit_selected()
+        return self.gateway.extract_info(self._browser.get_url())
 
     def server_form(self, user_settings):
         """
@@ -60,18 +60,18 @@ class BlueAngelHost(SolusvmHoster):
         :param user_settings: settings
         :return: 
         """
-        form = self.browser.select_form('form#frmConfigureProduct')
+        form = self._browser.select_form('form#frmConfigureProduct')
         self.fill_in_server_form(form, user_settings)
         form['configoption[72]'] = '87'  # Ubuntu
         form['configoption[73]'] = '91'  # 64 bit
-        self.browser.submit_selected()
+        self._browser.submit_selected()
 
     def start(self):
-        self.browser.open("https://www.blueangelhost.com/openvz-vps/")
-        options = self.parse_options(self.browser.get_current_page())
+        self._browser.open("https://www.blueangelhost.com/openvz-vps/")
+        options = self.parse_options(self._browser.get_current_page())
 
-        self.browser.open("https://www.blueangelhost.com/kvm-vps/")
-        options = itertools.chain(options, self.parse_options(self.browser.get_current_page(), is_kvm=True))
+        self._browser.open("https://www.blueangelhost.com/kvm-vps/")
+        options = itertools.chain(options, self.parse_options(self._browser.get_current_page(), is_kvm=True))
 
         return options
 
@@ -112,17 +112,17 @@ class BlueAngelHost(SolusvmHoster):
         )
 
     def get_status(self, user_settings):
-        clientarea = ClientArea(self.browser, self.clientarea_url, user_settings)
+        clientarea = ClientArea(self._browser, self.clientarea_url, user_settings)
         return clientarea.print_services()
 
     def set_rootpw(self, user_settings):
-        clientarea = ClientArea(self.browser, self.clientarea_url, user_settings)
+        clientarea = ClientArea(self._browser, self.clientarea_url, user_settings)
         clientarea.set_rootpw_client_data()
 
     def get_ip(self, user_settings):
-        clientarea = ClientArea(self.browser, self.clientarea_url, user_settings)
+        clientarea = ClientArea(self._browser, self.clientarea_url, user_settings)
         return clientarea.get_client_data_ip(self.client_data_url)
 
     def info(self, user_settings):
-        clientarea = ClientArea(self.browser, self.clientarea_url, user_settings)
+        clientarea = ClientArea(self._browser, self.clientarea_url, user_settings)
         return clientarea.get_client_data_info_dict(self.client_data_url)
