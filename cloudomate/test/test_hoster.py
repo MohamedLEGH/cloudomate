@@ -38,17 +38,17 @@ class TestHosters(unittest.TestCase):
 
 class TestHosterAbstract(unittest.TestCase):
     def test_hoster_options(self):
-        hoster = cloudomate.hoster.vps.hoster.Hoster()
+        hoster = cloudomate.hoster.hoster.Hoster()
         self.assertRaises(NotImplementedError, hoster.options)
 
     def test_hoster_purchase(self):
-        hoster = cloudomate.hoster.vps.hoster.Hoster()
+        hoster = cloudomate.hoster.hoster.Hoster()
         vps_option = VpsOption(name='', price='', cpu='', currency='USD', ram='', storage='', bandwidth='',
                                connection='', purchase_url='')
         self.assertRaises(NotImplementedError, hoster.purchase, *(None, vps_option, None))
 
     def test_hoster_print(self):
-        hoster = cloudomate.hoster.vps.hoster.Hoster()
+        hoster = cloudomate.hoster.hoster.Hoster()
         options = [self._create_option()]
         hoster.configurations = options
         wallet.get_rates = MagicMock(return_value={'USD': 1.1})
@@ -59,12 +59,8 @@ class TestHosterAbstract(unittest.TestCase):
         hoster.gateway.estimate_price.assert_called_once()
 
     def test_create_browser(self):
-        hoster = cloudomate.hoster.vps.hoster.Hoster()
-        browser = hoster._create_browser()
-        for header in browser.session.headers:
-            if 'Mozilla/5.0' in browser.session.headers[header]:
-                return True
-        self.fail('No User-agent set in browser')
+        hoster = cloudomate.hoster.hoster.Hoster()
+        self.assertRaises(NotImplementedError, hoster.options)
 
     @staticmethod
     def _create_option():
