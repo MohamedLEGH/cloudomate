@@ -23,12 +23,11 @@ class UserScraper:
     }
 
     def __init__(self, country='NL'):
-        self.br = StatefulBrowser()
+        self.browser = StatefulBrowser()
         self.page = UserScraper.pages.get(country)
 
-
     def get_user(self):
-        self.br.open(self.page)
+        self.browser.open(self.page)
         attrs = {}
 
         for attr in self.attributes:
@@ -59,10 +58,9 @@ class UserScraper:
                 config[mapping[attr]] = attrs[attr]
         return config
 
-
     def _get_attribute(self, attribute):
-        return self.br.get_current_page()\
-            .find(string=attribute)\
-            .parent.parent.parent\
-            .find('input')\
+        return self.browser.get_current_page() \
+            .find(string=attribute) \
+            .parent.parent.parent \
+            .find('input') \
             .get('value')

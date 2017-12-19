@@ -34,8 +34,8 @@ class AzireVpn(VpnHoster):
         self.gateway = bitpay
 
     def options(self):
-        self.br.open(self.OPTIONS_URL)
-        soup = self.br.get_current_page()
+        self.browser.open(self.OPTIONS_URL)
+        soup = self.browser.get_current_page()
         strong = soup.select_one("div.prices > ul > li:nth-of-type(2) > ul > li:nth-of-type(1) strong")
         string = strong.get_text()
         eur = float(string[string.index("€")+2 : string.index("/")-1])
@@ -72,8 +72,8 @@ class AzireVpn(VpnHoster):
         self._login(user_settings)
 
         # Retrieve the expiration date
-        self.br.open(self.DASHBOARD_URL)
-        soup = self.br.get_current_page()
+        self.browser.open(self.DASHBOARD_URL)
+        soup = self.browser.get_current_page()
         time = soup.select_one("div.dashboard time")
         d = time["datetime"]
 
@@ -89,17 +89,17 @@ class AzireVpn(VpnHoster):
         return VpnStatus(online, expiration)
 
     def _register(self, user_settings):
-        self.br.open(self.REGISTER_URL)
-        form = self.br.select_form()
+        self.browser.open(self.REGISTER_URL)
+        form = self.browser.select_form()
         form["username"] = user_settings.get("username")
         form["password"] = user_settings.get("password")
         form["password_confirmation"] = user_settings.get("password")
         #form["email"] = user_settings.get("email")
-        page = self.br.submit_selected()
+        page = self.browser.submit_selected()
 
         if page.url == self.REGISTER_URL:
             # An error occurred
-            soup = self.br.get_current_page()
+            soup = self.browser.get_current_page()
             ul = soup.select_one("ul.alert-danger")
             print(ul.get_text())
             sys.exit(2)
@@ -107,15 +107,15 @@ class AzireVpn(VpnHoster):
         return page
 
     def _login(self, user_settings):
-        self.br.open(self.LOGIN_URL)
-        form = self.br.select_form()
+        self.browser.open(self.LOGIN_URL)
+        form = self.browser.select_form()
         form["username"] = user_settings.get("username")
         form["password"] = user_settings.get("password")
-        page = self.br.submit_selected()
+        page = self.browser.submit_selected()
 
         if page.url == self.LOGIN_URL:
             # An error occurred
-            soup = self.br.get_current_page()
+            soup = self.browser.get_current_page()
             ul = soup.select_one("ul.alert-danger")
             print(ul.get_text())
             sys.exit(2)
@@ -123,11 +123,11 @@ class AzireVpn(VpnHoster):
         return page
 
     def _order(self, user_settings, wallet):
-        self.br.open(self.ORDER_URL)
-        form = self.br.select_form("form#orderForm")
+        self.browser.open(self.ORDER_URL)
+        form = self.browser.select_form("form#orderForm")
         form["package"] = "1"
         form["payment_gateway"] = "bitpay"
         form["tos"] = True
-        page = self.br.submit_selected()
+        page = self.browser.submit_selected()
 
         return page
