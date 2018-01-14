@@ -17,13 +17,9 @@ import rlp
 
 from web3 import Web3, HTTPProvider, IPCProvider
 from ethereum.transactions import Transaction
-
+from ethereum.utils import privtoaddr,checksum_encode
 
 NB_GAS_FOR_TRANSACTION = 21000
-# get gas price in gas station ??
-
-ETHER_TO_WEI=1000000000000000000
-WEI_TO_ETHER=0.000000000000000001
 
 def determine_currency(text):
     """
@@ -92,50 +88,86 @@ class Wallet:
     Wallets with passwords may still be used, but passwords will have to be entered manually.
     """
 
-    def __init__(self, private_key, provider):
-
-        	self.web3 = Web3(HTTPProvider(provider))
-        	assert web3.isConnected()
-        	self.key = private_key
-        	self.address = ethereum.utils.privtoaddr(private_key)
-		assert web3.isAddress(self.address)
+    def __init__(self, private_key, Ethprovider):
+        """
+	
+	You need to provide a private key (to sign transaction) and a node provider (to allow send of transactions on the network.
+	
+	Example
+	
+	## Main Network ##
+	
+	web3 = Web3(HTTPProvider('localhost:8545')) # need a local node, light node don't work, and I don't have enough space for full node
+	web3 = Web3(HTTPProvider('https://api.myetherapi.com/eth')) # don't work, 403 error
+	
+	web3 = Web3(HTTPProvider('https://mainnet.infura.io/YOUR_API_KEY'))
+	
+	## Ropsten ##
+	
+	web3 = Web3(HTTPProvider('https://api.myetherapi.com/rop')) # for Ropsten network, don't work
+	
+	web3 = Web3(HTTPProvider('https://ropsten.infura.io/YOUR_API_KEY')) 
+	
+	"""
+        self.web3 = Web3(HTTPProvider(Ethprovider))
+        assert self.web3.isConnected()
+        self.key = private_key
+        raw = privtoaddr(private_key)
+        self.address = checksum_encode(raw)
+        assert self.web3.isAddress(self.address)
 
     def get_balance(self):
         """
         Return the balance of the address
 
         """
-        assert web3.isConnected()
-        balance = web3.eth.getBalance(self.address) 
-
+        assert self.web3.isConnected()
+        balance_In_Wei = self.web3.eth.getBalance(self.address) 
+        balance = self.web3.fromWei(balance_In_Wei, 'ether')
         return balance
 
 
     def pay(self, addressToSend, amount, fee=get_network_fee(),number_gas=NB_GAS_FOR_TRANSACTION): 
-    	"""
-    	Function to send ether to an address, you can choose the fees
-    	
-    	"""
-	assert web3.isConnected()
-	nonceAddress=web3.eth.getTransactionCount(self.address)
-	assert web3.isAddress(addressToSend)
+        """
+        Function to send ether to an address, you can choose the fees
+        
+        """
+        assert self.web3.isConnected()
+        nonceAddress = self.web3.eth.getTransactionCount(self.address)
+        assert self.web3.isAddress(addressToSend)
 	
-	amount_In_Wei = amount*ETHER_TO_WEI
-	fee_In_Wei = fee*10**9 # 1 Gwei = 1 billion wei
+        amount_In_Wei = self.web3.toWei(amount, 'ether') 
+        fee_In_Wei = self.web3.toWei(fee, 'gwei') # 1 Gwei = 1 billion wei
 	
-	tx = Transaction(
-	nonce = nonceAddress,
-	gasprice = fee_In_Wei, 
-	startgas = number_gas,
-	to = addressToSend,
-	value = amount_In_Wei,
-	data = b'', # no need of additional data
-	)
-	tx.sign(self.key)
-	raw_tx = rlp.encode(tx)
-	raw_tx_hex = web3.toHex(raw_tx)
-	txHash = web3.eth.sendRawTransaction(raw_tx_hex)
+        tx = Transaction(
+        nonce = nonceAddress,
+        gasprice = fee_In_Wei, 
+        startgas = number_gas,
+        to = addressToSend,
+        value = amount_In_Wei,
+        data = b'', # no need of additional data
+        )
+        tx.sign(self.key)
+        raw_tx = rlp.encode(tx)
+        raw_tx_hex = self.web3.toHex(raw_tx)
+        txHash = self.web3.eth.sendRawTransaction(raw_tx_hex)
 	
-	return txHash
+        return txHash
 
-
+def main():
+	user_private_key = input("Please enter private key:")
+	user_Eth_provider = input("Please enter an url to an Eth provider:")
+	
+	MyWallet = Wallet(user_private_key,user_Eth_provider)
+	
+	print(MyWallet.get_balance())
+	
+	address_ToSend_eth = input("Please enter an address to send eth :")
+	
+	user_amount = float(input("Please provide an amount to send (in ether) : "))
+	
+	txHash = MyWallet.pay(address_ToSend_eth,user_amount)
+	print("Your txHash is :" + str(txHash))
+	
+if __name__ == "__main__":
+	main()
