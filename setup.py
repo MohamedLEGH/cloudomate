@@ -48,6 +48,7 @@ setup(
     extras_require={
         'dev': [],
         'test': ['mock', 'parameterized'],
+        'ethereum' : ['cryptocompy','rlp','web3','ethereum'],
     },
 
     package_data={

@@ -46,15 +46,17 @@ def execute(cmd=sys.argv[1:]):
     parser = ArgumentParser(description="Cloudomate")
 
     subparsers = parser.add_subparsers(dest="type")
-    add_vps_parsers(subparsers)
-    add_vpn_parsers(subparsers)
+    add_vps_parsers_bitcoin(subparsers)
+    add_vpn_parsers_bitcoin(subparsers)
+    add_vps_parsers_ethereum(subparsers)
+    add_vpn_parsers_ethereum(subparsers)
     subparsers.required = True
 
     args = parser.parse_args(cmd)
     args.func(args)
 
 
-def add_vpn_parsers(subparsers):
+def add_vpn_parsers_bitcoin(subparsers):
     vpn_parsers = subparsers.add_parser("vpn_bitcoin")
     vpn_parsers.set_defaults(type="vpn_bitcoin")
     vpn_subparsers = vpn_parsers.add_subparsers(dest="command")
@@ -67,7 +69,7 @@ def add_vpn_parsers(subparsers):
     add_parser_info(vpn_subparsers, "vpn_bitcoin")
 
 
-def add_vps_parsers(subparsers):
+def add_vps_parsers_bitcoin(subparsers):
     vps_parsers = subparsers.add_parser("vps_bitcoin")
     vps_parsers.set_defaults(type="vps_bitcoin")
     vps_subparsers = vps_parsers.add_subparsers(dest="command")
@@ -81,6 +83,36 @@ def add_vps_parsers(subparsers):
     add_parser_vps_get_ip(vps_subparsers)
     add_parser_vps_ssh(vps_subparsers)
     add_parser_info(vps_subparsers, "vps_bitcoin")
+
+
+def add_vpn_parsers_ethereum(subparsers):
+    vpn_parsers = subparsers.add_parser("vpn_ethereum")
+    vpn_parsers.set_defaults(type="vpn_ethereum")
+    vpn_subparsers = vpn_parsers.add_subparsers(dest="command")
+    vpn_subparsers.required = True
+
+    add_parser_list(vpn_subparsers, "vpn_ethereum")
+    add_parser_options(vpn_subparsers, "vpn_ethereum")
+    add_parser_purchase(vpn_subparsers, "vpn_ethereum")
+    add_parser_status(vpn_subparsers, "vpn_ethereum")
+    add_parser_info(vpn_subparsers, "vpn_ethereum")
+
+
+def add_vps_parsers_ethereum(subparsers):
+    vps_parsers = subparsers.add_parser("vps_ethereum")
+    vps_parsers.set_defaults(type="vps_ethereum")
+    vps_subparsers = vps_parsers.add_subparsers(dest="command")
+    vps_subparsers.required = True
+
+    add_parser_list(vps_subparsers, "vps_ethereum")
+    add_parser_options(vps_subparsers, "vps_ethereum")
+    add_parser_purchase(vps_subparsers, "vps_ethereum")
+    add_parser_status(vps_subparsers, "vps_ethereum")
+    add_parser_vps_setrootpw(vps_subparsers)
+    add_parser_vps_get_ip(vps_subparsers)
+    add_parser_vps_ssh(vps_subparsers)
+    add_parser_info(vps_subparsers, "vps_ethereum")
+
 
 
 def add_parser_list(subparsers, provider_type):
@@ -226,10 +258,13 @@ def purchase(args):
         sys.exit(2)
 
     if args.type == 'vps_bitcoin':
-        _purchase_vps(provider, user_settings, args.option)
-    else:
-        _purchase_vpn(provider, user_settings)
-
+        _purchase_vps_bitcoin(provider, user_settings, args.option)
+    else if args.type == 'vpn_bitcoin':
+        _purchase_vpn_bitcoin(provider, user_settings)
+    else if args.type == 'vps_ethereum':
+        _purchase_vps_ethereum(provider, user_settings)        
+    else if args.type == 'vpn_ethereum':
+        _purchase_vpn_ethereum(provider, user_settings)
 
 def _check_provider(provider, config):
     return config.verify_options(provider.required_settings)
@@ -425,23 +460,29 @@ def _register_vpn_bitcoin(p, user_settings):
 def _register_vps_ethereum(p, vps_option, user_settings):
     # For now use standard Bitcoin_Wallet implementation through Electrum
     # If Bitcoin_Wallet path is defined in config, use that.
-    if 'Bitcoin_Walletpath' in user_settings.config:
-        Bitcoin_Wallet = Bitcoin_Wallet(Bitcoin_Wallet_path=user_settings.get('Bitcoin_Walletpath'))
+    if 'Electrum_Walletpath' in user_settings.config:
+        Electreum_Wallet = Electrum_Wallet(Electrum_Wallet_path=user_settings.get('Electrum_Walletpath'))
     else:
-        Bitcoin_Wallet = Bitcoin_Wallet()
+        user_private_key = input("Please enter private key:")
+	user_Eth_provider = input("Please enter an url to an Eth provider:")
+	
+        Electreum_Wallet = Electreum_Wallet(user_private_key,user_Eth_provider)
 
-    p.purchase(user_settings=user_settings, options=vps_option, Bitcoin_Wallet=Bitcoin_Wallet)
+    p.purchase(user_settings=user_settings, options=vps_option, Electreum_Wallet=Electreum_Wallet)
 
 
 def _register_vpn_ethereum(p, user_settings):
     # For now use standard Bitcoin_Wallet implementation through Electrum
     # If Bitcoin_Wallet path is defined in config, use that.
-    if 'Bitcoin_Walletpath' in user_settings.config:
-        Bitcoin_Wallet = Bitcoin_Wallet(Bitcoin_Wallet_path=user_settings.get('Bitcoin_Walletpath'))
+    if 'Electreum_Walletpath' in user_settings.config:
+        Electreum_Wallet = Electreum_Wallet(Electreum_Wallet_path=user_settings.get('Electrum_Walletpath'))
     else:
-        Bitcoin_Wallet = Bitcoin_Wallet()
+        user_private_key = input("Please enter private key:")
+	user_Eth_provider = input("Please enter an url to an Eth provider:")
+	
+        Electreum_Wallet = Electreum_Wallet(user_private_key,user_Eth_provider)
 
-    p.purchase(user_settings=user_settings, Bitcoin_Wallet=Bitcoin_Wallet)
+    p.purchase(user_settings=user_settings, Electreum_Wallet=Electreum_Wallet)
 
 
 
