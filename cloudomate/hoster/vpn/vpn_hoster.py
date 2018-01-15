@@ -1,6 +1,6 @@
 from cloudomate.hoster.hoster import Hoster
 from collections import namedtuple
-from cloudomate import wallet as wallet_util
+from cloudomate import bitcoin_wallet as wallet_util
 
 import sys
 

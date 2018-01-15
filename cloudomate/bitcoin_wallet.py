@@ -232,4 +232,4 @@ class ElectrumWalletHandler(object):
         """
         address = subprocess.check_output(self.command + ['listaddresses']).decode()
         addr = json.loads(address)
-return addr
+        return addr

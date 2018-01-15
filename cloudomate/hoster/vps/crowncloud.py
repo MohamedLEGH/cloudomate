@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from cloudomate.hoster.vps.solusvm_hoster import SolusvmHoster
 from cloudomate.hoster.vps.clientarea import ClientArea
 from cloudomate.hoster.vps.vpsoption import VpsOption
-from cloudomate.wallet import determine_currency
+from cloudomate.bitcoin_wallet import determine_currency
 from mechanicalsoup import LinkNotFoundError
 
 
