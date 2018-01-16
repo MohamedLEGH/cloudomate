@@ -15,7 +15,7 @@ from cloudomate.hoster.vps.undergroundprivate import UndergroundPrivate
 from cloudomate.util.fakeuserscraper import UserScraper
 
 providers = [
-    (LineVast,),
+    # (LineVast,), # TODO: Find out why this test is unstable
     (BlueAngelHost,),
     (CCIHosting,),
     (CrownCloud,),
