@@ -42,14 +42,14 @@ class TestBitPay(unittest.TestCase):
         response = requests.Response()
         response.read = Mock(return_value=data)
         with patch.object(urllib.request, 'urlopen', return_value=response):
-            cls.amount, cls.address = bitpay.extract_info('https://bitpay.com/invoice?id=4JGT4867vAMLaXUCeezJbG')
+            cls.amount, cls.address = bitpay.extract_info('https://bitpay.com/invoice?id=KXnWTnNsNUrHK2PEp8TpDC')
 
     def test_address(self):
-        self.assertEqual(self.address, '1C3sb2urF4UZVgEAVcUvHaNyDQjCCQmai3')
+        self.assertEqual(self.address, '12cWmVndhmD56dzYcRuYka3Vpgjb3qdRoL')
         pass
 
     def test_amount(self):
-        self.assertEqual(self.amount, 0.010511)
+        self.assertEqual(self.amount, 0.001402)
 
     def test_address_valid(self):
         self.assertTrue(validate(self.address))
