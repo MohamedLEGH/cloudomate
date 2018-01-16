@@ -3,6 +3,7 @@ import unittest
 from parameterized import parameterized
 from mock.mock import MagicMock
 
+from cloudomate.exceptions.vps_out_of_stock import VPSOutOfStockException
 from cloudomate.hoster.vps.blueangelhost import BlueAngelHost
 from cloudomate.hoster.vps.ccihosting import CCIHosting
 from cloudomate.hoster.vps.crowncloud import CrownCloud
@@ -14,22 +15,17 @@ from cloudomate.hoster.vps.undergroundprivate import UndergroundPrivate
 from cloudomate.util.fakeuserscraper import UserScraper
 
 providers = [
+    (LineVast,),
     (BlueAngelHost,),
     (CCIHosting,),
     (CrownCloud,),
     (LegionBox,),
-    (LineVast,),
     (Pulseservers,),
     (UndergroundPrivate,),
 ]
 
 
 class TestHosters(unittest.TestCase):
-    @parameterized.expand(providers)
-    def test_hoster_implements_interface(self, hoster):
-        self.assertTrue('options' in dir(hoster), msg='options is not implemented in {0}'.format(hoster.name))
-        self.assertTrue('purchase' in dir(hoster), msg='purchase is not implemented in {0}'.format(hoster.name))
-
     @parameterized.expand(providers)
     def test_hoster_options(self, hoster):
         options = hoster().start()
@@ -43,9 +39,11 @@ class TestHosters(unittest.TestCase):
         wallet = MagicMock()
         wallet.pay = MagicMock()
 
-        host.purchase(user_settings, options, wallet)
-
-        wallet.pay.assert_called_once()
+        try:
+            host.purchase(user_settings, options, wallet)
+            wallet.pay.assert_called_once()
+        except VPSOutOfStockException as exception:
+            self.skipTest(exception)
 
 
 if __name__ == '__main__':
