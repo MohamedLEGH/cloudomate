@@ -259,11 +259,11 @@ def purchase(args):
 
     if args.type == 'vps_bitcoin':
         _purchase_vps_bitcoin(provider, user_settings, args.option)
-    else if args.type == 'vpn_bitcoin':
+    elif args.type == 'vpn_bitcoin':
         _purchase_vpn_bitcoin(provider, user_settings)
-    else if args.type == 'vps_ethereum':
+    elif args.type == 'vps_ethereum':
         _purchase_vps_ethereum(provider, user_settings)        
-    else if args.type == 'vpn_ethereum':
+    elif args.type == 'vpn_ethereum':
         _purchase_vpn_ethereum(provider, user_settings)
 
 def _check_provider(provider, config):
@@ -464,7 +464,7 @@ def _register_vps_ethereum(p, vps_option, user_settings):
         Electreum_Wallet = Electrum_Wallet(Electrum_Wallet_path=user_settings.get('Electrum_Walletpath'))
     else:
         user_private_key = input("Please enter private key:")
-	user_Eth_provider = input("Please enter an url to an Eth provider:")
+        user_Eth_provider = input("Please enter an url to an Eth provider:")
 	
         Electreum_Wallet = Electreum_Wallet(user_private_key,user_Eth_provider)
 
@@ -478,7 +478,7 @@ def _register_vpn_ethereum(p, user_settings):
         Electreum_Wallet = Electreum_Wallet(Electreum_Wallet_path=user_settings.get('Electrum_Walletpath'))
     else:
         user_private_key = input("Please enter private key:")
-	user_Eth_provider = input("Please enter an url to an Eth provider:")
+        user_Eth_provider = input("Please enter an url to an Eth provider:")
 	
         Electreum_Wallet = Electreum_Wallet(user_private_key,user_Eth_provider)
 

@@ -78,8 +78,8 @@ def get_network_fee(): # with web3.py he gives 520 gwei which is too much
     br = StatefulBrowser(user_agent='Firefox')
     page = br.open('http://gasprice.dopedapp.com/')
     response = page.json()
-    gwei_cost = float(response['safe_price_in_gwei'])
-    return gwei_cost
+    gwei_price = float(response['safe_price_in_gwei'])
+    return gwei_price
 
 
 class Wallet:
