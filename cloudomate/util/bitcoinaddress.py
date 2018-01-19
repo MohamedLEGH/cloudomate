@@ -1,5 +1,4 @@
 """Validate bitcoin/altcoin addresses
-
 Copied from:
 http://rosettacode.org/wiki/Bitcoin/address_validation#Python
 """
@@ -11,7 +10,6 @@ digits58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
 def _bytes_to_long(bytestring, byteorder):
     """Convert a bytestring to a long
-
     For use in python version prior to 3.2
     """
     if byteorder == 'little':
@@ -23,7 +21,6 @@ def _bytes_to_long(bytestring, byteorder):
 
 def _long_to_bytes(n, length, byteorder):
     """Convert a long to a bytestring
-
     For use in python version prior to 3.2
     Source:
     http://bugs.python.org/issue16580#msg177208
@@ -37,7 +34,6 @@ def _long_to_bytes(n, length, byteorder):
 
 def decode_base58(bitcoin_address, length):
     """Decode a base58 encoded address
-
     This form of base58 decoding is bitcoind specific. Be careful outside of
     bitcoind context.
     """
@@ -80,7 +76,6 @@ def encode_base58(bytestring):
 
 def validate(bitcoin_address, magicbyte=0):
     """Check the integrity of a bitcoin address
-
     Returns False if the address is invalid.
     >>> validate('1AGNa15ZQXAZUgFiqJ2i7Z2DPU2J6hW62i')
     True
@@ -109,4 +104,4 @@ def validate(bitcoin_address, magicbyte=0):
     # Encoded bytestring should be equal to the original address,
     # for example '14oLvT2' has a valid checksum, but is not a valid btc
     # address
-    return bitcoin_address == encode_base58(bcbytes)
+return bitcoin_address == encode_base58(bcbytes)
