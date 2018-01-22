@@ -3,7 +3,7 @@ from cloudomate.hoster.vpn.vpn_hoster import VpnStatus
 from cloudomate.hoster.vpn.vpn_hoster import VpnInfo
 from cloudomate.gateway import bitpay
 from cloudomate.util.captchasolver import captchaSolver
-from cloudomate import wallet as wallet_util
+from cloudomate import bitcoin_wallet as wallet_util
 from forex_python.converter import CurrencyRates
 import sys
 import datetime
