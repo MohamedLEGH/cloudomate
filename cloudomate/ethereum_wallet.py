@@ -10,6 +10,8 @@ import urllib.request
 
 from mechanicalsoup import StatefulBrowser
 
+from cloudomate.util.infura import Infura 
+
 # library for currency prices
 from cryptocompy import price
 
@@ -98,9 +100,22 @@ class Wallet:
 
     def get_Infura_node():
         """
-        To get an access to the infura service
+        To get an access to the infura service, mainnet
         """    
-        return "https://ropsten.infura.io/FFxYa0JaUoDljkoTWMQG"
+        InfuraNode = Infura()
+        Ethprovider = InfuraNode.register()['Mainnet']
+        
+        return Ethprovider
+
+    def get_InfuraRopsten_node():
+        """
+        To get an access to the infura service, test network
+        """    
+        InfuraNode = Infura()
+        Ethprovider = InfuraNode.register()['Ropsten']
+        
+        return Ethprovider
+
 
     def __init__(self, private_key=create_private_key(), Ethprovider=get_Infura_node()):
         """
