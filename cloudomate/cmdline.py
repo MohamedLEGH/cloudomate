@@ -10,6 +10,7 @@ from cloudomate.hoster.vps.linevast import LineVast
 from cloudomate.hoster.vps.pulseservers import Pulseservers
 from cloudomate.hoster.vps.undergroundprivate import UndergroundPrivate
 from cloudomate.hoster.vpn.azirevpn import AzireVpn
+from cloudomate.hoster.vpn.mullvad import MullVad
 from cloudomate.util.config import UserOptions
 from cloudomate.util.fakeuserscraper import UserScraper
 from cloudomate.bitcoin_wallet import Wallet as Bitcoin_Wallet
@@ -31,6 +32,7 @@ providers = {
     },
     "vpn_bitcoin": {
         "azirevpn": AzireVpn(),
+        "mullvad": MullVad(),
     },
     "vps_ethereum": {
         "blueangelhost": BlueAngelHost(),
