@@ -1,15 +1,23 @@
 from robobrowser import RoboBrowser
 from cloudomate.util.recaptchasolver import reCaptchaSolver
 import re
+import random
 
 class Infura:
     h = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"
     br = RoboBrowser(parser='html.parser', history=True, user_agent=h)
 
-    # Registration details
-    first_name = ""
-    last_name = ""
-    email = ""
+    def randomGenerator(self, length=0):
+        if length is 0:
+            length = random.randrange(4, 15)
+
+        possibilities = "abcdefghijklmnopqrstuvwxyz"
+        temp = ""
+
+        for i in range(0, length):
+            temp = temp + possibilities[random.randrange(len(possibilities))]
+
+        return temp
 
     def register(self):
         registration = "https://form.infura.io/form/embed.php?id=11217"
@@ -23,9 +31,9 @@ class Infura:
         # Post data
         form = self.br.get_form()
         key = form['element_4'].value
-        data = {"element_3_1" : self.first_name,
-                "element_3_2" : self.last_name,
-                "element_2" : self.email,
+        data = {"element_3_1" : self.randomGenerator(0),
+                "element_3_2" : self.randomGenerator(0),
+                "element_2" : self.randomGenerator(0) + "@" + self.randomGenerator(0) + "." + self.randomGenerator(length=3),
                 "element_4" : key,
                 "element_13" : "",
                 "element_14" : "",
