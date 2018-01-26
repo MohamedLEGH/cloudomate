@@ -18,7 +18,7 @@ import rlp
 
 from web3 import Web3, HTTPProvider, IPCProvider
 from ethereum.transactions import Transaction
-from ethereum.utils import privtoaddr,checksum_encode
+from ethereum.utils import privtoaddr,checksum_encode,sha3,encode_hex
 
 NB_GAS_FOR_TRANSACTION = 21000
 
@@ -89,7 +89,7 @@ class Wallet:
     Wallets with passwords may still be used, but passwords will have to be entered manually.
     """
 
-    def __init__(self, private_key, Ethprovider):
+    def __init__(self, private_key=create_private_key(), Ethprovider):
         """
 	
 	You need to provide a private key (to sign transaction) and a node provider (to allow send of transactions on the network.
@@ -116,6 +116,16 @@ class Wallet:
         raw = privtoaddr(private_key)
         self.address = checksum_encode(raw)
         assert self.web3.isAddress(self.address)
+        
+    def create_private_key():
+        """
+        To create a private key, may not be secure
+        """
+        
+        private_key = encode_hex(sha3(os.urandom(4096)))
+        return private_key
+
+    
 
     def get_balance(self):
         """
