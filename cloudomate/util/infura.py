@@ -2,7 +2,7 @@ from robobrowser import RoboBrowser
 from cloudomate.util.recaptchasolver import reCaptchaSolver
 import re
 
-class infura:
+class Infura:
     h = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"
     br = RoboBrowser(parser='html.parser', history=True, user_agent=h)
 
