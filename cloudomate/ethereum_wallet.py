@@ -18,7 +18,7 @@ import rlp
 
 from web3 import Web3, HTTPProvider, IPCProvider
 from ethereum.transactions import Transaction
-from ethereum.utils import privtoaddr,checksum_encode
+from ethereum.utils import privtoaddr,checksum_encode,sha3,encode_hex
 
 NB_GAS_FOR_TRANSACTION = 21000
 
@@ -88,8 +88,21 @@ class Wallet:
     Currently Wallet only supports electrum wallets without passwords for automated operation.
     Wallets with passwords may still be used, but passwords will have to be entered manually.
     """
+    def create_private_key():
+        """
+        To create a private key, may not be secure
+        """
+        
+        private_key = encode_hex(sha3(os.urandom(4096)))
+        return private_key
 
-    def __init__(self, private_key, Ethprovider):
+    def get_Infura_node():
+        """
+        To get an access to the infura service
+        """    
+        return "https://ropsten.infura.io/FFxYa0JaUoDljkoTWMQG"
+
+    def __init__(self, private_key=create_private_key(), Ethprovider=get_Infura_node()):
         """
 	
 	You need to provide a private key (to sign transaction) and a node provider (to allow send of transactions on the network.
@@ -116,7 +129,7 @@ class Wallet:
         raw = privtoaddr(private_key)
         self.address = checksum_encode(raw)
         assert self.web3.isAddress(self.address)
-
+        
     def get_balance(self):
         """
         Return the balance of the address
@@ -140,20 +153,22 @@ class Wallet:
         amount_In_Wei = self.web3.toWei(amount, 'ether') 
         fee_In_Wei = self.web3.toWei(fee, 'gwei') # 1 Gwei = 1 billion wei
 	
-        tx = Transaction(
-        nonce = nonceAddress,
-        gasprice = fee_In_Wei, 
-        startgas = number_gas,
-        to = addressToSend,
-        value = amount_In_Wei,
-        data = b'', # no need of additional data
-        )
-        tx.sign(self.key)
-        raw_tx = rlp.encode(tx)
-        raw_tx_hex = self.web3.toHex(raw_tx)
-        txHash = self.web3.eth.sendRawTransaction(raw_tx_hex)
-	
-        return txHash
+        if(self.web3.eth.getBalance(self.address) >= amount_In_Wei + fee_In_Wei):
+            tx = Transaction(
+            nonce = nonceAddress,
+            gasprice = fee_In_Wei, 
+            startgas = number_gas,
+            to = addressToSend,
+            value = amount_In_Wei,
+            data = b'', # no need of additional data
+            )
+            tx.sign(self.key)
+            raw_tx = rlp.encode(tx)
+            raw_tx_hex = self.web3.toHex(raw_tx)
+            txHash = self.web3.eth.sendRawTransaction(raw_tx_hex)
+            return txHash
+        else:
+            print("No enough ether on your account")
 
 def main():
 	user_private_key = input("Please enter private key:")
