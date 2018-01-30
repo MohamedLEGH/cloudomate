@@ -1,4 +1,3 @@
-# https://www.vps.ag/lightkvm
 import time
 import re
 from selenium import webdriver
@@ -7,9 +6,6 @@ class anticaptcha:
 
     username = ""
     password = ""
-
-    def __init__(self):
-        pass
 
     # Use this method for puchasing with Bitcoin.
     def purchase_bitcoin(self, amount=10):
@@ -78,7 +74,8 @@ class anticaptcha:
         print("Filling in $" + str(amount) + ".")
         form = driver.find_element_by_id("amountInput")
         form.clear()
-        form.send_keys(str(amount))
+        for i in range(0, len(str(amount))): # Because of a small bug, the numbers need to be send one by one.
+            form.send_keys(str(amount)[i])
         time.sleep(1)
         print("Click Pay.")
         driver.find_element_by_id("paymentButton").find_element_by_css_selector("button.btn.btn-primary.btn-manager")\
