@@ -19,7 +19,7 @@ class anticaptcha:
     def purchase_dash(self, amount=10):
         return self.purchase(["DASH", "DASH", "dash"], amount)
 
-    #Don't invoke this method.
+    # Don't invoke this method directly.
     def purchase(self, currency, amount=10):
         # Selenium setup: headless Chrome, Window size needs to be big enough, otherwise elements will not be found.
         options = webdriver.ChromeOptions()
