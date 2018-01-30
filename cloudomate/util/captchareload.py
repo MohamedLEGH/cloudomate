@@ -1,4 +1,3 @@
-# https://www.vps.ag/lightkvm
 import time
 import re
 from selenium import webdriver
