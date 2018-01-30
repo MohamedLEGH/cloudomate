@@ -37,7 +37,7 @@ class ExpressVpn(VpnHoster):
 
         return super().options()
 
-    def purchase(self, user_settings):
+    def purchase(self, user_settings, wallet):
         # Prepare for the purchase on the ExpressVPN website
 
         page = self._order(user_settings)
@@ -48,9 +48,9 @@ class ExpressVpn(VpnHoster):
         print(('Paying %s BTC to %s' % (amount, address)))
         fee = wallet_util.get_network_fee()
         print(('Calculated fee: %s' % fee))
-        #transaction_hash = wallet.pay(address, amount, fee)
+        transaction_hash = wallet.pay(address, amount, fee)
         print('Done purchasing')
-        #return transaction_hash
+        return transaction_hash
 
     def info(self, user_settings):
         response = requests.get(self.REGISTER_URL)
@@ -79,6 +79,7 @@ class ExpressVpn(VpnHoster):
 
 
     def _order(self, user_settings):
+        #Register with email and choose 1 month plan
         self.br.open(self.REGISTER_URL)
         form = self.br.select_form()
         #print(form.print_summary())
@@ -87,8 +88,10 @@ class ExpressVpn(VpnHoster):
         form["signup[email]"] = user_settings.get("email")
         form["commit"] = "Continue to BitPay"
         self.br.submit_selected()
+        #Go to redirect page with wait_for parameter
         wait_for = str(self.br.get_url()).split("&")[2]
         redirect_page = self.br.open("https://www.expressvpn.com/signup/waiting?"+wait_for)
+        #Get the url for bitpayment from the (second) redirect page and open it
         #print(self.br.get_url())
         page = self.br.open(redirect_page.text.split(":", 1)[1].split('"')[1])
         print(self.br.get_url())
