@@ -7,15 +7,15 @@ class anticaptcha:
     username = ""
     password = ""
 
-    # Use this method for puchasing with Bitcoin.
+    # Use this method for purchasing with Bitcoin.
     def purchase_bitcoin(self, amount=10):
         return self.purchase(["Bitcoin", "BTC", "btc"], amount)
 
-    # Use this method for puchasing with Litecoin.
+    # Use this method for purchasing with Litecoin.
     def purchase_litecoin(self, amount=10):
         return self.purchase(["Litecoin", "LTC", "ltc"], amount)
 
-    # Use this method for puchasing with DASH.
+    # Use this method for purchasing with DASH.
     def purchase_dash(self, amount=10):
         return self.purchase(["DASH", "DASH", "dash"], amount)
 
