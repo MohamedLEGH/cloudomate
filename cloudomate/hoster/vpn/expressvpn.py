@@ -2,7 +2,7 @@ from cloudomate.hoster.vpn.vpn_hoster import VpnHoster
 from cloudomate.hoster.vpn.vpn_hoster import VpnStatus
 from cloudomate.hoster.vpn.vpn_hoster import VpnInfo
 from cloudomate.gateway import bitpay
-from cloudomate import wallet as wallet_util
+from cloudomate import bitcoin_wallet as wallet_util
 from forex_python.converter import CurrencyRates
 import sys
 import re
@@ -10,7 +10,7 @@ import datetime
 import requests
 
 class ExpressVpn(VpnHoster):
-    REGISTER_URL = "https://www.expressvpn.com/fr/order"
+    REGISTER_URL = "https://www.expressvpn.com/order"
 
     required_settings = [
         'email',
@@ -32,15 +32,15 @@ class ExpressVpn(VpnHoster):
         soup = self.br.get_current_page()
         strong = soup.select("div.prices > ul > li:nth-of-type(2) > ul > li:nth-of-type(1) strong")
        	textValue = soup.select("div.wrapper > div.content > div.click_off_alerts > form.new_signup > div:nth-of-type(3) > div.row > div:nth-of-type(2) > div.plan > div.plan-box > div.plan-amount > div.price > div.monthly-amount")[0].text
-        priceVPN = float(re.search(r'\d+\.\d+',textValue).group())
-        self.price = priceVPN
+        #priceVPN = float(re.search(r'\d+\.\d+',textValue).group())
+        self.price = float(textValue)
 
         return super().options()
 
-    def purchase(self, user_settings, wallet):
+    def purchase(self, user_settings):
         # Prepare for the purchase on the ExpressVPN website
 
-        page = self._order(user_settings, wallet)
+        page = self._order(user_settings)
 
         # Make the payment
         print("Purchasing ExpressVPN instance")
@@ -48,9 +48,9 @@ class ExpressVpn(VpnHoster):
         print(('Paying %s BTC to %s' % (amount, address)))
         fee = wallet_util.get_network_fee()
         print(('Calculated fee: %s' % fee))
-        transaction_hash = wallet.pay(address, amount, fee)
+        #transaction_hash = wallet.pay(address, amount, fee)
         print('Done purchasing')
-        return transaction_hash
+        #return transaction_hash
 
     def info(self, user_settings):
         response = requests.get(self.REGISTER_URL)
@@ -78,11 +78,24 @@ class ExpressVpn(VpnHoster):
         return VpnStatus(online, expiration)
 
 
-    def _order(self, user_settings, wallet):
+    def _order(self, user_settings):
         self.br.open(self.REGISTER_URL)
-        form = br.select_form()
+        form = self.br.select_form()
+        #print(form.print_summary())
         form["signup[package_id]"] = "1"
+        form["signup[payment_method]"] = "5"
         form["signup[email]"] = user_settings.get("email")
         form["commit"] = "Continue to BitPay"
-        page = self.br.submit_selected()
+        self.br.submit_selected()
+        wait_for = str(self.br.get_url()).split("&")[2]
+        redirect_page = self.br.open("https://www.expressvpn.com/signup/waiting?"+wait_for)
+        #print(self.br.get_url())
+        page = self.br.open(redirect_page.text.split(":", 1)[1].split('"')[1])
+        print(self.br.get_url())
+        #print(page.text)
         return page
+
+if __name__ == '__main__':
+    ev = ExpressVpn()
+    user_settings = {"email" : "chicker@tudelft.nl"}
+    ev.purchase(user_settings)
