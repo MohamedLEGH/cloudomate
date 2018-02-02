@@ -4,10 +4,52 @@ import sys
 from selenium import webdriver
 import requests
 import os
+from cloudomate import bitcoin_wallet as bitcoin_wallet_util
+from cloudomate import ethereum_wallet as ethereum_wallet_util
+from cloudomate.bitcoin_wallet import Wallet as BitcoinWallet
+from cloudomate.ethereum_wallet import Wallet as EthereumWallet
+from cloudomate.hoster.vpn.vpn_hoster import VpnHoster, VpnOption
 
-class vpnac:
+class Vpnac(VpnHoster):
     COINPAYMENTS_URL = "https://www.coinpayments.net/index.php?cmd=checkout"
     PURCHASE_URL = "https://vpn.ac/vpn-accounts"
+    OPTIONS_URL = "https://vpn.ac/vpn-accounts"
+
+    @staticmethod
+    def get_metadata():
+        return "VpnAc", "https://vpn.ac"
+
+    @staticmethod
+    def get_gateway():
+        return None
+
+    @staticmethod
+    def get_required_settings():
+        return {"user": ["username", "password"]}
+
+    @classmethod
+    def get_options(cls):
+        # Get string with price from the website
+        browser = cls._create_browser()
+        browser.open(cls.OPTIONS_URL)
+        soup = browser.get_current_page()
+        div = soup.select_one("div.box__price")
+        string = div.get_text()
+         
+        # Calculate the price in USD
+        price = float(string[2])
+
+        name, _ = cls.get_metadata()
+        option = VpnOption(name, "OpenVPN", price, sys.maxsize, sys.maxsize)
+        return [option]
+
+
+    def get_status(self):
+        pass
+
+    def get_configuration(self):
+        pass
+
 
     # Use this method for purchasing with Bitcoin.
     def retrieve_bitcoin(self, user_settings):
@@ -149,22 +191,33 @@ class vpnac:
         time.sleep(2)
         return {'amount': str(amount), 'address': str(address)}
 
-    def pay(self,amount,address,coin_type):
-        
-        #pay the amount to the address with the scpefified currency (if enough balance), otherwise print message "Bticoin/Ethereum/Litecoin Balance not enough" (depending on the currency chosen)
-        
+    def pay(self,amount,address,coin_type,wallet):
+        #Pay amount using specified COIN wallet, if their is not enough balance available print "Not enough balance for the specified COIN-payment"
+
         print("\nPayment process of " + str(amount) + " of " + str(coin_type) + " to " + str(address) + " started")
         if coin_type == 'BTC':
             print("\nConnecting to bitcoin wallet")
             print("\nChecking Balance...")
-        elif coin_type == 'LTC':
-            print("\nConnecting to litecoin wallet")
-            print("\nChecking Balance...")
+            fee = bitcoin_wallet_util.get_network_fee()
         elif coin_type == 'ETH':
-            print("\nConnecting to Ethereum Wallet...")
+            print("\nConnecting to bitcoin wallet")
             print("\nChecking Balance...")
-            pass
-        pass
+            fee = ethereum_wallet_util.get_network_fee()
+        if (wallet.get_balance() >= fee + float(amount)):
+            transaction_hash = wallet.pay(address, amount, fee)
+            print('Done purchasing')
+            return transaction_hash
+        else:
+            print(" Not enough " + str(coin_type))
+
+    def purchase(self, wallet, option):
+        if isinstance(wallet,EthereumWallet):
+            payment = self.retrieve_ethereum(self._settings)
+            self.pay(payment["amount"],payment["address"],"ETH",wallet)
+        elif isinstance(wallet,BitcoinWallet):   
+            payment = self.retrieve_bitcoin(self._settings)
+            self.pay(payment["amount"],payment["address"],"BTC",wallet)
+
 
     def saveLoginAfterPurchase(self, username, password):
 

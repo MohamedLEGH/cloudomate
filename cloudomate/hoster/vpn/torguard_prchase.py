@@ -4,11 +4,52 @@ import os
 import requests
 from selenium import webdriver
 import sys
+from cloudomate import bitcoin_wallet as bitcoin_wallet_util
+from cloudomate import ethereum_wallet as ethereum_wallet_util
+from cloudomate.bitcoin_wallet import Wallet as BitcoinWallet
+from cloudomate.ethereum_wallet import Wallet as EthereumWallet
+from cloudomate.hoster.vpn.vpn_hoster import VpnHoster, VpnOption
 
-class torguard:
+class Torguard(VpnHoster):
     PURCHASE_URL = "https://torguard.net/cart.php?gid=2"
     COINPAYMENTS_URL = "https://www.coinpayments.net/index.php?cmd=checkout"
+    OPTIONS_URL = "https://torguard.net/"
     driver = None
+
+    @staticmethod
+    def get_metadata():
+        return "TorGuard", "https://www.torguard.net/"
+
+    @staticmethod
+    def get_gateway():
+        return None
+ 
+    @staticmethod
+    def get_required_settings():
+        return {"user": ["username", "password"]}
+
+    @classmethod
+    def get_options(cls):
+        # Get string with price from the website
+        browser = cls._create_browser()
+        browser.open(cls.OPTIONS_URL)
+        soup = browser.get_current_page()
+        strong = soup.select("strong")
+        string = strong[2].get_text()
+         
+        # Calculate the price in USD
+        price = float(string[string.index("$") + 1: string.index("/") - 1])
+
+        name, _ = cls.get_metadata()
+        option = VpnOption(name, "OpenVPN", price, sys.maxsize, sys.maxsize)
+        return [option]
+
+
+    def get_status(self):
+        pass
+
+    def get_configuration(self):
+        pass
 
     # Use this method for purchasing with Bitcoin.
     def retrieve_bitcoin(self, user_settings):
@@ -37,7 +78,7 @@ class torguard:
         return "Error " + str(message) + "\nTry again. It it still does not work," \
                                          "website might have been updated, update script."
 
-    def __init__(self):
+    def __init__(self, settings):
         
         #Download the appropriate executable chromedirver and place this in the folder for the script to access
         res = requests.get('https://chromedriver.storage.googleapis.com/2.35/chromedriver_linux64.zip')
@@ -166,21 +207,35 @@ class torguard:
         time.sleep(2)
         return {'amount': str(amount), 'address': str(address)}
 
-    def pay(self,amount,address,coin_type):
+    def pay(self,amount,address,coin_type,wallet):
         #Pay amount using specified COIN wallet, if their is not enough balance available print "Not enough balance for the specified COIN-payment"
 
         print("\nPayment process of " + str(amount) + " of " + str(coin_type) + " to " + str(address) + " started")
         if coin_type == 'BTC':
             print("\nConnecting to bitcoin wallet")
             print("\nChecking Balance...")
-        elif coin_type == 'LTC':
-            print("\nConnecting to litecoin wallet")
-            print("\nChecking Balance...")
+            fee = bitcoin_wallet_util.get_network_fee()
         elif coin_type == 'ETH':
-            print("\nConnecting to Ethereum Wallet...")
+            print("\nConnecting to bitcoin wallet")
             print("\nChecking Balance...")
-            pass
-        pass
+            fee = ethereum_wallet_util.get_network_fee()
+        if (wallet.get_balance() >= fee + float(amount)):
+            transaction_hash = wallet.pay(address, amount, fee)
+            print('Done purchasing')
+            return transaction_hash
+        else:
+            print(" Not enough " + str(coin_type))
+
+    def purchase(self, wallet, option):
+        if isinstance(wallet,EthereumWallet):
+            payment = self.retrieve_ethereum(self._settings)
+            self.pay(payment["amount"],payment["address"],"ETH",wallet)
+        elif isinstance(wallet,BitcoinWallet):
+            payment = self.retrieve_bitcoin(self._settings)
+            self.pay(payment["amount"],payment["address"],"BTC",wallet)
+
+
+
 
     def saveLoginAfterPurchase(self, username, password):
 

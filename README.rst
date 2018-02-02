@@ -48,7 +48,7 @@ Currently the following VPS providers are implemented: ::
 
 This same list can be accessed through the list command. ::
 
-   cloudomate vps list
+   cloudomate vps_bitcoin list
 
 VPN
 ---------
@@ -56,10 +56,13 @@ VPN
 Currently the following VPN providers are implemented: ::
 
    azirevpn       https://www.azirevpn.com
+   mullvad        https://www.mullvad.net/en
+   torguard       https://torguard.net/index.php
+   vpnac          https://vpn.ac
 
 This same list can be accessed through the list command. ::
 
-   cloudomate vpn list
+   cloudomate vpn_bitcoin list
 
 
 Configuration
@@ -71,7 +74,7 @@ location for the configuration file is `$HOME/.config/cloudomate.cfg`.
 
 A configuration file looks like this ::
 
-   [User]
+   [user]
    email = 
    firstName = 
    lastName = 
@@ -79,20 +82,22 @@ A configuration file looks like this ::
    phoneNumber = 
    password = 
 
-   [Address]
+   [address]
    address = 
    city = 
    state = 
    countryCode = 
    zipcode = 
 
-   [Server]
+   [server]
    rootpw = 
    ns1 = 
    ns2 = 
    hostname = 
 
-
+   [captcha]
+   captchaaccount
+   
 Section can be overridden for specific providers by adding a section,
 for example a [linevast] section can contain a separate email address only
 to be used for Linevast_.
@@ -103,12 +108,12 @@ Basic usage
 
 ::
 
-   usage: cloudomate [-h] {vps,vpn} ...
+   usage: cloudomate [-h] {vps_bitcoin,vpn_bitcoin,vps_ethereum,vpn_ethereum} ...
 
    Cloudomate
 
    positional arguments:
-     {vps,vpn}
+     {vps_bitcoin,vpn_bitcoin,vps_ethereum,vpn_ethereum}
        
    optional arguments:
      -h, --help            show this help message and exit
@@ -118,7 +123,7 @@ VPS
 
 ::
 
-   usage: cloudomate vps [-h] 
+   usage: cloudomate vps_bitcoin [-h] 
                          {list,options,purchase,status,setrootpw,getip,ssh,info}
                          ...
 
@@ -141,7 +146,7 @@ VPN
 
 ::
 
-   usage: cloudomate [-h] {vps,vpn} ...
+   usage: cloudomate [-h] {vps_bitcoin,vpn_bitcoin,vps_ethereum,vpn_ethereum} ...
 
    positional arguments:
      {list,options,purchase,status,info}
@@ -161,7 +166,7 @@ options
 List the options for Linevast_ ::
     
     
-   $ cloudomate vps options linevast
+   $ cloudomate vps_bitcoin options linevast
 
 ::
     
@@ -184,7 +189,7 @@ Purchase
 Use the purchase command to purchase a VPS instance. An account is created
 and the instance is paid through an Electrum wallet. ::
    
-   $ cloudomate vps purchase linevast 0
+   $ cloudomate vps_bitcoin purchase linevast 0
   
 ::
 
@@ -192,6 +197,10 @@ and the instance is paid through an Electrum wallet. ::
    Name           CPU            RAM            Storage        Bandwidth      Est.Price
    Basis OVZ      1              2              50             unmetered      6.99
    Purchase this option? (y/N)
+
+::
+   $ cloudomate vpn_bitcoin purchase torguard
+
 
 Manage
 ------

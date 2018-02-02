@@ -21,6 +21,8 @@ from cloudomate import bitcoin_wallet as bitcoin_wallet_util
 from cloudomate import ethereum_wallet as ethereum_wallet_util
 from cloudomate.hoster.vpn.azirevpn import AzireVpn
 from cloudomate.hoster.vpn.mullvad import MullVad
+from cloudomate.hoster.vpn.torguard_purchase import Torguard
+from cloudomate.hoster.vpn.vpnac_purchase import Vpnac
 from cloudomate.hoster.vps.blueangelhost import BlueAngelHost
 from cloudomate.hoster.vps.ccihosting import CCIHosting
 from cloudomate.hoster.vps.crowncloud import CrownCloud
@@ -54,12 +56,16 @@ providers = CaseInsensitiveDict({
     "vpn_bitcoin": _map_providers_to_dict([
         AzireVpn,
         MullVad,
+        Torguard,
+        Vpnac,
     ]),
     "vps_ethereum": _map_providers_to_dict([
         BlueAngelHost,
     ]),
     "vpn_ethereum": _map_providers_to_dict([
         AzireVpn,
+        Torguard,
+        Vpnac,
     ])
 })
 
@@ -316,7 +322,7 @@ def purchase(args):
         print("Missing option")
         sys.exit(2)
 
-    if args.type == 'vps_bitcoin' or 'vps_ethereum':
+    if args.type == "vps_bitcoin" or args.type =="vps_ethereum":
         _purchase_vps(provider, user_settings, args)
     else:
         _purchase_vpn(provider, user_settings, args)
@@ -557,10 +563,12 @@ def _register(provider, vps_option, settings, args):
                                                             'walletpath'))
         else:
             wallet = BitcoinWallet()
-    elif args.type == 'vps_ethereum' or 'vpn_ethereum':
+    elif args.type == 'vps_ethereum' or args.type == 'vpn_ethereum':
          if settings.has_key('cient', 'privatekey') and settings.has_key('client', 'ethprovider'):
              wallet = EthereumWallet(privat_key=settings.get('client', 
              'privatekey'), eth_provider=settings.get('client', 'ethprovider'))
+         else:
+             wallet = EthereumWallet()
 
     provider_instance = provider(settings)
     provider_instance.purchase(wallet, vps_option)
